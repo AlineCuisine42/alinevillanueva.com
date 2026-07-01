@@ -2118,16 +2118,16 @@ nav.scrolled .nav-amv { color: var(--ink); }
       </div>
       <div class="card-body">
         <div class="phases">
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2026-07">
             <div class="phase-date">Jul 2026</div>
-            <div class="phase-line-wrap"><div class="phase-dot active"></div><div class="phase-connector"></div></div>
+            <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
               <div class="phase-name">Walmart Nuked + Eagle Adapt Transfer</div>
               <div class="phase-desc">Pay off $149 Walmart balance. Transfer $3,000 from BofA to Eagle Adapt (0% until Jan 2028) when card arrives.</div>
               <div class="phase-freed">$10 min freed → Citi sprint</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2026-10">
             <div class="phase-date">Oct 2026</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2136,7 +2136,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">$494/mo freed → PayPal attack begins</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2026-12">
             <div class="phase-date">Dec 2026</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2145,7 +2145,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">$57/mo freed → rolls to target</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2027-02">
             <div class="phase-date">Feb 2027</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2154,7 +2154,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">Rolls to Best Buy</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2027-05">
             <div class="phase-date">May 2027</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2163,7 +2163,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">Rolls to Chase</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2027-09">
             <div class="phase-date">Sep 2027</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2172,7 +2172,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">Rolls to BofA</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2027-11">
             <div class="phase-date">Late 2027</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2181,7 +2181,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">Rolls to USAA Rate</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2028-01">
             <div class="phase-date">Jan 2028</div>
             <div class="phase-line-wrap"><div class="phase-dot"></div><div class="phase-connector"></div></div>
             <div class="phase-content">
@@ -2190,7 +2190,7 @@ nav.scrolled .nav-amv { color: var(--ink); }
               <div class="phase-freed">$167/mo freed → USAA Rate gets full avalanche</div>
             </div>
           </div>
-          <div class="phase-row">
+          <div class="phase-row" data-phase-date="2029-03">
             <div class="phase-date">Q1 2029</div>
             <div class="phase-line-wrap"><div class="phase-dot" style="border-color:var(--green);width:16px;height:16px;margin-top:2px;"></div></div>
             <div class="phase-content">
@@ -3331,6 +3331,38 @@ function calcBudget() {
   saveFinanceData();
 }
 
+// ── TIMELINE AUTO-HIGHLIGHT ──────────────────────────────────────────────────
+function updateTimelineActive() {
+  const now = new Date();
+  const nowYM = now.getFullYear() * 100 + (now.getMonth() + 1); // e.g. 202607
+
+  const rows = document.querySelectorAll('.phase-row[data-phase-date]');
+  let activeRow = null;
+
+  rows.forEach(row => {
+    const dot = row.querySelector('.phase-dot');
+    const parts = row.getAttribute('data-phase-date').split('-');
+    const rowYM = parseInt(parts[0]) * 100 + parseInt(parts[1]);
+
+    // Remove active from all
+    if (dot) dot.classList.remove('active');
+    row.querySelector('.phase-name') && (row.querySelector('.phase-name').style.color = '');
+
+    // The active phase is the earliest one whose date >= today
+    if (activeRow === null && rowYM >= nowYM) {
+      activeRow = row;
+    }
+  });
+
+  // If all phases are in the past (debt free!), highlight the last one
+  if (!activeRow) activeRow = rows[rows.length - 1];
+
+  if (activeRow) {
+    const dot = activeRow.querySelector('.phase-dot');
+    if (dot) dot.classList.add('active');
+  }
+}
+
 // ── FINANCE DATA PERSISTENCE ─────────────────────────────────────────────────
 const FINANCE_FIELDS = ['e-paycheck','e-ssi','e-car','e-ins','e-power','e-water','e-sunbit','e-grocery','e-gas','e-cigs','e-dining','e-other'];
 
@@ -3384,6 +3416,7 @@ function initFinanceData() {
       buildBudgetChart();
       updateProgress();
       calcBudget();
+      updateTimelineActive();
     }).catch(function() {
       try {
         const local = localStorage.getItem('financeData');
@@ -3395,6 +3428,7 @@ function initFinanceData() {
       buildBudgetChart();
       updateProgress();
       calcBudget();
+      updateTimelineActive();
     });
   } else {
     try {
@@ -3407,6 +3441,7 @@ function initFinanceData() {
     buildBudgetChart();
     updateProgress();
     calcBudget();
+    updateTimelineActive();
   }
 }
 
