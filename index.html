@@ -2312,7 +2312,9 @@ function openPrivateArea() {
   }
   if (!debtChartsBuilt) {
     debtChartsBuilt = true;
-    if (typeof buildTable === 'function') {
+    if (typeof initFinanceData === 'function') {
+      initFinanceData();
+    } else if (typeof buildTable === 'function') {
       buildTable();
       buildAPRChart();
       buildProjectionChart();
@@ -3098,6 +3100,7 @@ function updateDebt(id, val) {
   updateProgress();
   updateAPRChart();
   updateProjectionChart();
+  saveFinanceData();
 }
 
 // ── PROGRESS RING ─────────────────────────────────────────────────────────────
@@ -3324,6 +3327,86 @@ function calcBudget() {
   if (budgetChart) {
     budgetChart.data.datasets[0].data = [fixed, varexp, Math.max(0,avail)];
     budgetChart.update();
+  }
+  saveFinanceData();
+}
+
+// ── FINANCE DATA PERSISTENCE ─────────────────────────────────────────────────
+const FINANCE_FIELDS = ['e-paycheck','e-ssi','e-car','e-ins','e-power','e-water','e-sunbit','e-grocery','e-gas','e-cigs','e-dining','e-other'];
+
+function saveFinanceData() {
+  const data = {};
+  FINANCE_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  debts.forEach(d => { data['debt_' + d.id] = d.balance; });
+  // Save to localStorage immediately
+  try { localStorage.setItem('financeData', JSON.stringify(data)); } catch(e) {}
+  // Save to Firestore
+  if (typeof db !== 'undefined') {
+    db.collection('financeData').doc('budget').set(data)
+      .then(function() {
+        var ind = document.getElementById('sync-indicator');
+        if (ind) { ind.textContent = '\u25cf Synced'; ind.style.color = '#4caf50'; }
+      })
+      .catch(function(e) { console.error('Finance save error:', e); });
+  }
+}
+
+function loadFinanceData(data) {
+  if (!data) return;
+  FINANCE_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] !== undefined) el.value = data[id];
+  });
+  debts.forEach(d => {
+    if (data['debt_' + d.id] !== undefined) d.balance = parseFloat(data['debt_' + d.id]) || 0;
+  });
+}
+
+function initFinanceData() {
+  // Try Firestore first, fall back to localStorage
+  if (typeof db !== 'undefined') {
+    db.collection('financeData').doc('budget').get().then(function(doc) {
+      if (doc.exists) {
+        loadFinanceData(doc.data());
+      } else {
+        // Try localStorage fallback
+        try {
+          const local = localStorage.getItem('financeData');
+          if (local) loadFinanceData(JSON.parse(local));
+        } catch(e) {}
+      }
+      buildTable();
+      buildAPRChart();
+      buildProjectionChart();
+      buildBudgetChart();
+      updateProgress();
+      calcBudget();
+    }).catch(function() {
+      try {
+        const local = localStorage.getItem('financeData');
+        if (local) loadFinanceData(JSON.parse(local));
+      } catch(e) {}
+      buildTable();
+      buildAPRChart();
+      buildProjectionChart();
+      buildBudgetChart();
+      updateProgress();
+      calcBudget();
+    });
+  } else {
+    try {
+      const local = localStorage.getItem('financeData');
+      if (local) loadFinanceData(JSON.parse(local));
+    } catch(e) {}
+    buildTable();
+    buildAPRChart();
+    buildProjectionChart();
+    buildBudgetChart();
+    updateProgress();
+    calcBudget();
   }
 }
 
