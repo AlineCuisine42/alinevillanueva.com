@@ -1684,16 +1684,16 @@ nav.scrolled .nav-amv { color: var(--ink); }
     <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:12px;">All Works — Table View</h3>
     <div style="overflow-x:auto;">
       <table id="analytics-table">
-        <thead>
+        <thead id="analytics-thead">
           <tr>
-            <th>Title</th>
-            <th>Year</th>
-            <th>Medium</th>
-            <th>Dims</th>
-            <th>Price</th>
-            <th>Cost</th>
-            <th>Margin</th>
-            <th>Status</th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('title')">Title <span id="asort-title" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('year')">Year <span id="asort-year" style="color:#b48c5a;">&#x2193;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('medium')">Medium <span id="asort-medium" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('dims')">Dims <span id="asort-dims" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('price')">Price <span id="asort-price" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('cost')">Cost <span id="asort-cost" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('margin')">Margin <span id="asort-margin" style="opacity:0.3;">&#x21C5;</span></th>
+            <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortAnalytics('status')">Status <span id="asort-status" style="opacity:0.3;">&#x21C5;</span></th>
           </tr>
         </thead>
         <tbody id="analytics-tbody"></tbody>
@@ -2905,8 +2905,39 @@ function renderAnalytics() {
       <span style="font-family:'DM Mono',monospace;font-weight:500;">${c}</span>
     </div>`).join('');
 
-  // Table
-  document.getElementById('analytics-tbody').innerHTML = works.map(w => {
+  // Table — sorted by column
+  const { col: ac, dir: ad } = window._aSort;
+  const am = ad === 'asc' ? 1 : -1;
+  const sortedWorks = [...works].sort((a, b) => {
+    const ma = a.price && a.materials ? Math.round(((a.price - a.materials) / a.price) * 100) : -999;
+    const mb = b.price && b.materials ? Math.round(((b.price - b.materials) / b.price) * 100) : -999;
+    if (ac === 'title')  return am * (a.title||'').localeCompare(b.title||'');
+    if (ac === 'year')   return am * ((a.year||0) - (b.year||0));
+    if (ac === 'medium') return am * (a.medium||'').localeCompare(b.medium||'');
+    if (ac === 'dims')   return am * (a.dims||'').localeCompare(b.dims||'');
+    if (ac === 'price')  return am * ((a.price||0) - (b.price||0));
+    if (ac === 'cost')   return am * ((a.materials||0) - (b.materials||0));
+    if (ac === 'margin') return am * (ma - mb);
+    if (ac === 'status') return am * (a.status||'').localeCompare(b.status||'');
+    return 0;
+  });
+
+  // Update header arrows
+  ['title','year','medium','dims','price','cost','margin','status'].forEach(c => {
+    const el = document.getElementById('asort-' + c);
+    if (!el) return;
+    if (window._aSort.col === c) {
+      el.innerHTML = window._aSort.dir === 'asc' ? '&#x2191;' : '&#x2193;';
+      el.style.opacity = '1';
+      el.style.color = '#b48c5a';
+    } else {
+      el.innerHTML = '&#x21C5;';
+      el.style.opacity = '0.3';
+      el.style.color = '';
+    }
+  });
+
+  document.getElementById('analytics-tbody').innerHTML = sortedWorks.map(w => {
     const margin = w.price && w.materials ? Math.round(((w.price - w.materials) / w.price) * 100) : '—';
     return `<tr>
       <td><div class="td-title">${w.title}</div></td>
