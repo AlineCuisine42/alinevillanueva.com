@@ -2546,10 +2546,16 @@ function generatePost(id) {
     ctx.fillStyle = 'rgba(20, 16, 12, 0.72)';
     ctx.fillRect(40, SIZE - 310, SIZE - 80, 72);
 
-    // Title
+    // Title — auto-shrink to fit within post boundaries
     ctx.fillStyle = '#f0e9dc';
-    ctx.font = 'italic 58px Georgia, serif';
     ctx.textAlign = 'center';
+    const maxTitleWidth = SIZE - 120; // 60px padding each side
+    let titleSize = 58;
+    ctx.font = `italic ${titleSize}px Georgia, serif`;
+    while (ctx.measureText(w.title || '').width > maxTitleWidth && titleSize > 24) {
+      titleSize -= 2;
+      ctx.font = `italic ${titleSize}px Georgia, serif`;
+    }
     ctx.fillText(w.title || '', SIZE / 2, SIZE - 252);
 
     // Medium + dims
