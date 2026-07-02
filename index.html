@@ -1681,7 +1681,10 @@ nav.scrolled .nav-amv { color: var(--ink); }
     </div>
   </div>
   <div class="card" style="margin-top:20px;">
-    <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:12px;">All Works — Table View</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin:0;">All Works — Table View</h3>
+      <button onclick="printInventory()" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.1em;padding:6px 14px;cursor:pointer;border-radius:2px;">&#x1F5A8; Print</button>
+    </div>
     <div style="overflow-x:auto;">
       <table id="analytics-table">
         <thead id="analytics-thead">
@@ -2868,6 +2871,58 @@ function copyQuote() {
 // ── ANALYTICS ───────────────────────────────────────────────
 // ── Analytics sort state ─────────────────────────────────────
 window._aSort = window._aSort || { col: 'year', dir: 'desc' };
+
+function printInventory() {
+  const { col: ac, dir: ad } = window._aSort || { col: 'year', dir: 'desc' };
+  const am = ad === 'asc' ? 1 : -1;
+  const sorted = [...works].sort((a, b) => {
+    if (ac === 'title')  return am * (a.title||'').localeCompare(b.title||'');
+    if (ac === 'year')   return am * ((a.year||0) - (b.year||0));
+    if (ac === 'medium') return am * (a.medium||'').localeCompare(b.medium||'');
+    if (ac === 'price')  return am * ((a.price||0) - (b.price||0));
+    if (ac === 'status') return am * (a.status||'').localeCompare(b.status||'');
+    return am * ((a.year||0) - (b.year||0));
+  });
+
+  const rows = sorted.map((w, i) => `
+    <tr class="${i % 2 === 0 ? 'even' : 'odd'}">
+      <td>${i + 1}</td>
+      <td><strong>${w.title || '—'}</strong></td>
+      <td>${w.year || '—'}</td>
+      <td>${w.medium || '—'}</td>
+      <td>${w.dims || '—'}</td>
+      <td>${w.price ? '$' + Number(w.price).toLocaleString() : '—'}</td>
+      <td>${w.status ? w.status.charAt(0).toUpperCase() + w.status.slice(1) : '—'}</td>
+    </tr>`).join('');
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html>
+<html><head>
+<title>Inventory — Aline Marbella Villanueva</title>
+<style>
+  body { font-family: Georgia, serif; color: #1a1a1a; margin: 40px; }
+  h1 { font-size: 1.4rem; font-weight: 400; margin-bottom: 4px; }
+  p.sub { font-size: 0.8rem; color: #777; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; border-bottom: 2px solid #1a1a1a; padding: 6px 10px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e0dcd6; vertical-align: top; }
+  tr.even td { background: #faf9f7; }
+  @media print {
+    body { margin: 20px; }
+    button { display: none; }
+  }
+</style>
+</head><body>
+<h1>Inventory</h1>
+<p class="sub">Aline Marbella Villanueva &nbsp;·&nbsp; Printed ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })} &nbsp;·&nbsp; ${sorted.length} works</p>
+<button onclick="window.print()" style="margin-bottom:20px;padding:8px 20px;font-family:Georgia,serif;font-size:0.82rem;cursor:pointer;border:1px solid #1a1a1a;background:white;">Print / Save as PDF</button>
+<table>
+  <thead><tr><th>#</th><th>Title</th><th>Year</th><th>Medium</th><th>Dims</th><th>Price</th><th>Status</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+</body></html>`);
+  printWin.document.close();
+}
 
 function sortAnalytics(col) {
   if (window._aSort.col === col) {
