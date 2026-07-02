@@ -2402,6 +2402,21 @@ function updateHeader() {
 updateHeader();
 
 // ── INVENTORY ───────────────────────────────────────────────
+// Track column sort state for list view
+if (typeof window._colSort === 'undefined') {
+  window._colSort = { col: 'year', dir: 'desc' };
+}
+
+function sortByCol(col) {
+  if (window._colSort.col === col) {
+    window._colSort.dir = window._colSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    window._colSort.col = col;
+    window._colSort.dir = col === 'price' ? 'desc' : 'asc';
+  }
+  renderInventory();
+}
+
 function renderInventory() {
   const q = document.getElementById('search-inv').value.toLowerCase();
   const status = document.getElementById('filter-status').value;
@@ -2422,10 +2437,26 @@ function renderInventory() {
     return true;
   });
 
-  if (sort === 'newest') list.sort((a, b) => b.created - a.created);
-  if (sort === 'price-hi') list.sort((a, b) => (b.price||0) - (a.price||0));
-  if (sort === 'price-lo') list.sort((a, b) => (a.price||0) - (b.price||0));
-  if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title));
+  if (view === 'grid') {
+    // Grid view: use dropdown sort
+    if (sort === 'newest') list.sort((a, b) => b.created - a.created);
+    if (sort === 'price-hi') list.sort((a, b) => (b.price||0) - (a.price||0));
+    if (sort === 'price-lo') list.sort((a, b) => (a.price||0) - (b.price||0));
+    if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title));
+  } else {
+    // List view: use column header sort
+    const { col, dir } = window._colSort;
+    const m = dir === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      if (col === 'title')  return m * (a.title||'').localeCompare(b.title||'');
+      if (col === 'year')   return m * ((a.year||0) - (b.year||0));
+      if (col === 'medium') return m * (a.medium||'').localeCompare(b.medium||'');
+      if (col === 'dims')   return m * (a.dims||'').localeCompare(b.dims||'');
+      if (col === 'price')  return m * ((a.price||0) - (b.price||0));
+      if (col === 'status') return m * (a.status||'').localeCompare(b.status||'');
+      return 0;
+    });
+  }
 
   const out = document.getElementById('inventory-output');
 
@@ -2437,9 +2468,24 @@ function renderInventory() {
   if (view === 'grid') {
     out.innerHTML = `<div class="works-grid">${list.map(workCard).join('')}</div>`;
   } else {
+    const arrow = (col) => {
+      if (window._colSort.col !== col) return ' <span style="opacity:0.3;">⇅</span>';
+      return window._colSort.dir === 'asc' ? ' <span style="color:#b48c5a;">↑</span>' : ' <span style="color:#b48c5a;">↓</span>';
+    };
+    const th = (label, col) =>
+      `<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="sortByCol('${col}')">${label}${arrow(col)}</th>`;
     out.innerHTML = `
       <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Title</th><th>Year</th><th>Medium</th><th>Dims</th><th>Edition</th><th>Price</th><th>Status</th><th></th></tr></thead>
+        <thead><tr>
+          ${th('Title','title')}
+          ${th('Year','year')}
+          ${th('Medium','medium')}
+          ${th('Dims','dims')}
+          <th>Edition</th>
+          ${th('Price','price')}
+          ${th('Status','status')}
+          <th></th>
+        </tr></thead>
         <tbody>${list.map(workRow).join('')}</tbody>
       </table></div>`;
   }
