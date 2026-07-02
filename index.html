@@ -2580,15 +2580,17 @@ function generatePost(id) {
     ctx.font = '24px Arial, sans-serif';
     ctx.fillText('alinevillanueva.com', SIZE / 2, SIZE - 52);
 
-    // Auto-download
+    // Show preview overlay with Share + Save options
     const dataUrl = canvas.toDataURL('image/png');
     const filename = (w.title || 'post').replace(/\s+/g, '_') + '_post.png';
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    if (typeof openPostPreview === 'function') {
+      openPostPreview(dataUrl, filename);
+    } else {
+      // Fallback: direct download
+      const a = document.createElement('a');
+      a.href = dataUrl; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
   }
 
   if (w.image) {
@@ -3605,10 +3607,19 @@ function initFinanceData() {
      LIGHTBOX
 ════════════════════════════════════════════════════════════════ -->
 <!-- Post Preview Overlay -->
-<div id="post-preview-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,10,8,0.95);align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;" onclick="this.style.display='none'">
-  <button onclick="document.getElementById('post-preview-overlay').style.display='none'" style="position:fixed;top:20px;right:28px;background:none;border:none;color:#f7f7f5;font-size:2rem;cursor:pointer;z-index:100000;">&#10005;</button>
-  <p style="color:rgba(247,244,239,0.45);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin:0;" onclick="event.stopPropagation()">Hold image to save to camera roll</p>
-  <img loading="lazy" id="post-preview-img" src="" alt="Post Preview" style="max-width:min(90vw,600px);max-height:75vh;object-fit:contain;border-radius:4px;box-shadow:0 8px 48px rgba(0,0,0,0.6);" onclick="event.stopPropagation()">
+<div id="post-preview-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,10,8,0.96);align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:24px;" onclick="closePostPreview(event)">
+  <!-- Close -->
+  <button onclick="document.getElementById('post-preview-overlay').style.display='none'" style="position:fixed;top:18px;right:24px;background:none;border:none;color:#f7f7f5;font-size:2rem;cursor:pointer;z-index:100000;line-height:1;">&#10005;</button>
+  <!-- Label -->
+  <p style="color:rgba(247,244,239,0.5);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:0;" onclick="event.stopPropagation()">Post Preview</p>
+  <!-- Image -->
+  <img id="post-preview-img" src="" alt="Post Preview" style="max-width:min(88vw,560px);max-height:62vh;object-fit:contain;border-radius:4px;box-shadow:0 8px 48px rgba(0,0,0,0.7);" onclick="event.stopPropagation()">
+  <!-- Action buttons -->
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;" onclick="event.stopPropagation()">
+    <button id="post-share-btn" onclick="sharePost()" style="display:none;padding:13px 28px;background:#b48c5a;border:none;border-radius:3px;color:#1a1510;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">&#x2197; Share</button>
+    <button onclick="savePost()" style="padding:13px 28px;background:#2a2018;border:1px solid #b48c5a;border-radius:3px;color:#e8d9c0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">&#x2193; Save Image</button>
+  </div>
+  <p style="color:rgba(247,244,239,0.3);font-family:'DM Sans',sans-serif;font-size:11px;margin:0;" onclick="event.stopPropagation()">On iPad: tap Save Image, or hold the image to save to Photos</p>
 </div>
 
 <div id="lb-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,10,8,0.92);align-items:center;justify-content:center;padding:20px;" onclick="closeLightbox(event)">
@@ -3623,11 +3634,48 @@ function initFinanceData() {
 </div>
 
 <script>
-function downloadPostPreview() {
+function closePostPreview(e) {
+  // Only close if clicking the dark backdrop itself (not buttons or image)
+  if (e && e.target !== document.getElementById('post-preview-overlay')) return;
+  document.getElementById('post-preview-overlay').style.display = 'none';
+}
+
+function openPostPreview(dataUrl, filename) {
+  window._postPreviewUrl = dataUrl;
+  window._postPreviewFilename = filename;
+  const img = document.getElementById('post-preview-img');
+  if (img) img.src = dataUrl;
+  // Show Share button only if Web Share API is available (iOS Safari, Chrome Android)
+  const shareBtn = document.getElementById('post-share-btn');
+  if (shareBtn) shareBtn.style.display = navigator.share ? 'inline-block' : 'none';
+  const overlay = document.getElementById('post-preview-overlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+async function sharePost() {
   const url = window._postPreviewUrl;
-  const filename = window._postPreviewFilename || 'post_forsale.png';
+  const filename = window._postPreviewFilename || 'post.png';
+  if (!url || !navigator.share) return;
+  try {
+    // Convert data URL to Blob for sharing
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'New Work Available' });
+    } else {
+      // Fallback: share URL only
+      await navigator.share({ title: 'New Work Available', url: 'https://alinevillanueva.com' });
+    }
+  } catch(e) {
+    if (e.name !== 'AbortError') console.warn('Share failed:', e);
+  }
+}
+
+function savePost() {
+  const url = window._postPreviewUrl;
+  const filename = window._postPreviewFilename || 'post.png';
   if (!url) return;
-  // Try standard download first (works on desktop Chrome/Firefox)
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
