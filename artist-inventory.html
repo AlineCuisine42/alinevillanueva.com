@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Ledger — Artist Inventory & Pricing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink:       #1a1714;
+    --canvas:    #f7f4ef;
+    --warm-mid:  #e8e2d8;
+    --warm-dark: #c9bfb0;
+    --accent:    #c05c2a;
+    --accent-lt: #f0e0d6;
+    --gold:      #a87c3a;
+    --success:   #3a7a58;
+    --muted:     #7a7269;
+    --white:     #ffffff;
+    --shadow:    0 2px 12px rgba(26,23,20,0.10);
+    --radius:    6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--canvas);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--canvas);
+    padding: 20px 32px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.55rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .brand span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--warm-dark);
+  }
+  .header-stats {
+    display: flex;
+    gap: 28px;
+  }
+  .hstat { text-align: right; }
+  .hstat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--canvas);
+  }
+  .hstat-lbl {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--warm-dark);
+  }
+
+  /* ── TABS ── */
+  nav.tabs {
+    background: var(--white);
+    border-bottom: 1.5px solid var(--warm-mid);
+    display: flex;
+    padding: 0 32px;
+    gap: 2px;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 14px 20px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--ink); }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 28px 32px 48px; max-width: 1100px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--warm-mid);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--warm-mid);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  /* ── FORM GRID ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 9px 12px;
+    border: 1.5px solid var(--warm-mid);
+    border-radius: var(--radius);
+    background: var(--canvas);
+    color: var(--ink);
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--white);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #a84d20; }
+  .btn-ghost {
+    background: none;
+    border: 1.5px solid var(--warm-mid);
+    color: var(--ink);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: none; border: 1.5px solid #d44; color: #d44; }
+  .btn-danger:hover { background: #fef2f2; }
+  .btn-success { background: var(--success); color: #fff; }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .tag-available { background: #d4f0e2; color: #1a5c3a; }
+  .tag-sold      { background: #fce4d4; color: #8a2e0d; }
+  .tag-reserved  { background: #fef5d4; color: #7a5a00; }
+  .tag-nfs       { background: #e8e2d8; color: #5a5048; }
+
+  /* ── WORK CARDS GRID ── */
+  .works-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .work-card {
+    background: var(--white);
+    border: 1px solid var(--warm-mid);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .work-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,23,20,0.13); }
+  .work-card-img {
+    width: 100%;
+    height: 160px;
+    background: var(--warm-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-style: italic;
+    position: relative;
+    overflow: hidden;
+  }
+  .work-card-img img { width: 100%; height: 100%; object-fit: cover; }
+  .work-card-body { padding: 14px 16px; }
+  .work-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .work-card-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+  .work-card-price {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .work-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── PRICING CALCULATOR ── */
+  .pricing-result {
+    background: var(--ink);
+    color: var(--canvas);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 16px;
+  }
+  .pricing-breakdown { margin-top: 12px; }
+  .price-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: var(--warm-mid);
+  }
+  .price-line.total {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--canvas);
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  .price-range {
+    font-size: 0.75rem;
+    color: var(--warm-dark);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* ── QUOTE BUILDER ── */
+  .quote-output {
+    background: var(--canvas);
+    border: 1.5px dashed var(--warm-dark);
+    border-radius: var(--radius);
+    padding: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    margin-top: 16px;
+    color: var(--ink);
+  }
+
+  /* ── ANALYTICS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-box {
+    background: var(--white);
+    border: 1px solid var(--warm-mid);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    text-align: center;
+  }
+  .stat-box .val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .stat-box .lbl {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th {
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--canvas);
+    border-bottom: 1.5px solid var(--warm-mid);
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--warm-mid); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--canvas); }
+  td .td-title { font-weight: 500; }
+  td .td-sub { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* ── FILTER ROW ── */
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .filter-row input, .filter-row select {
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    max-width: 180px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,23,20,0.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(26,23,20,0.3);
+  }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--warm-mid);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px;
+  }
+  .modal-body { padding: 20px 24px 24px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    .panel { padding: 20px 16px 48px; }
+    nav.tabs { padding: 0 16px; }
+    .tab-btn { padding: 12px 12px 10px; font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Studio Ledger</h1>
+    <span>Artist Inventory &amp; Pricing System</span>
+  </div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-val" id="hstat-total">0</div>
+      <div class="hstat-lbl">Works</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="hstat-value">$0</div>
+      <div class="hstat-lbl">Portfolio Value</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="hstat-sold">$0</div>
+      <div class="hstat-lbl">Total Sold</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('inventory', this)">Inventory</button>
+  <button class="tab-btn" onclick="showTab('add', this)">Add Work</button>
+  <button class="tab-btn" onclick="showTab('pricing', this)">Pricing Calculator</button>
+  <button class="tab-btn" onclick="showTab('shipping', this)">Shipping Calculator</button>
+  <button class="tab-btn" onclick="showTab('quote', this)">Quote Builder</button>
+  <button class="tab-btn" onclick="showTab('analytics', this)">Analytics</button>
+</nav>
+
+<!-- ══════════════ INVENTORY ══════════════ -->
+<div class="panel active" id="panel-inventory">
+  <div class="section-title">
+    <span>Your Works</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="view-toggle" onchange="renderInventory()" style="max-width:100px;font-size:0.78rem;padding:6px 10px;">
+        <option value="grid">Grid</option>
+        <option value="list">List</option>
+      </select>
+    </div>
+  </div>
+  <div class="filter-row">
+    <input type="text" id="search-inv" placeholder="Search title, medium…" oninput="renderInventory()">
+    <select id="filter-status" onchange="renderInventory()">
+      <option value="">All Status</option>
+      <option value="available">Available</option>
+      <option value="sold">Sold</option>
+      <option value="reserved">Reserved</option>
+      <option value="nfs">NFS</option>
+    </select>
+    <select id="filter-medium" onchange="renderInventory()">
+      <option value="">All Mediums</option>
+    </select>
+    <select id="sort-inv" onchange="renderInventory()">
+      <option value="newest">Newest First</option>
+      <option value="price-hi">Price High→Low</option>
+      <option value="price-lo">Price Low→High</option>
+      <option value="title">Title A–Z</option>
+    </select>
+  </div>
+  <div id="inventory-output"></div>
+</div>
+
+<!-- ══════════════ ADD WORK ══════════════ -->
+<div class="panel" id="panel-add">
+  <div class="section-title">Add a New Work</div>
+  <div class="card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" id="add-title" placeholder="Untitled No. 1">
+      </div>
+      <div class="form-group">
+        <label>Year *</label>
+        <input type="number" id="add-year" placeholder="2024" min="1900" max="2100">
+      </div>
+      <div class="form-group">
+        <label>Medium *</label>
+        <input type="text" id="add-medium" list="medium-list" placeholder="Oil on canvas">
+        <datalist id="medium-list">
+          <option value="Oil on canvas">
+          <option value="Acrylic on canvas">
+          <option value="Watercolor on paper">
+          <option value="Gouache on paper">
+          <option value="Graphite on paper">
+          <option value="Charcoal on paper">
+          <option value="Pastel on paper">
+          <option value="Ink on paper">
+          <option value="Mixed media">
+          <option value="Digital print">
+          <option value="Screen print">
+          <option value="Etching">
+          <option value="Linocut">
+          <option value="Photograph">
+          <option value="Sculpture – bronze">
+          <option value="Sculpture – ceramic">
+          <option value="Sculpture – wood">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Dimensions (H × W × D inches)</label>
+        <input type="text" id="add-dims" placeholder='e.g. 24 × 18 or 24 × 18 × 2'>
+      </div>
+      <div class="form-group">
+        <label>Edition / Unique</label>
+        <select id="add-edition">
+          <option value="unique">Unique / One-of-a-kind</option>
+          <option value="2">Edition of 2</option>
+          <option value="5">Edition of 5</option>
+          <option value="10">Edition of 10</option>
+          <option value="25">Edition of 25</option>
+          <option value="50">Edition of 50</option>
+          <option value="100">Edition of 100</option>
+          <option value="open">Open Edition</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="add-status">
+          <option value="available">Available</option>
+          <option value="reserved">Reserved</option>
+          <option value="sold">Sold</option>
+          <option value="nfs">Not for Sale</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Asking Price ($)</label>
+        <input type="number" id="add-price" placeholder="0" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Cost of Materials ($)</label>
+        <input type="number" id="add-materials" placeholder="0" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Hours to Create</label>
+        <input type="number" id="add-hours" placeholder="0" min="0" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>Series / Collection</label>
+        <input type="text" id="add-series" placeholder="e.g. Coastal Studies">
+      </div>
+      <div class="form-group">
+        <label>Location / Storage</label>
+        <input type="text" id="add-location" placeholder="e.g. Studio A, Shelf 2">
+      </div>
+      <div class="form-group">
+        <label>Image (optional)</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label for="add-image-file" class="btn btn-ghost" style="cursor:pointer;justify-content:center;font-size:0.82rem;padding:9px 12px;text-align:center;border-radius:var(--radius);">
+            📷 Upload Photo
+          </label>
+          <input type="file" id="add-image-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'add-image-preview','add-image-data')">
+          <div id="add-image-preview" style="display:none;position:relative;">
+            <img id="add-image-preview-img" src="" alt="Preview" style="width:100%;max-height:140px;object-fit:cover;border-radius:var(--radius);border:1.5px solid var(--warm-mid);">
+            <button type="button" onclick="clearImageUpload('add-image-file','add-image-preview','add-image-data')" style="position:absolute;top:4px;right:4px;background:rgba(26,23,20,0.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;line-height:22px;text-align:center;">✕</button>
+          </div>
+          <input type="hidden" id="add-image-data" value="">
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Description / Notes</label>
+        <textarea id="add-notes" placeholder="Provenance, inspiration, exhibition history…"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button class="btn btn-primary" onclick="addWork()">＋ Add to Inventory</button>
+      <button class="btn btn-ghost" onclick="clearAddForm()">Clear</button>
+    </div>
+    <div id="add-feedback" style="margin-top:12px;font-size:0.85rem;"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PRICING CALCULATOR ══════════════ -->
+<div class="panel" id="panel-pricing">
+  <div class="section-title">Pricing Calculator</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;" id="pricing-layout">
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:16px;">Work Details</h3>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="form-group">
+          <label>Height (in)</label>
+          <input type="number" id="pc-h" value="24" min="0" step="0.5" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Width (in)</label>
+          <input type="number" id="pc-w" value="18" min="0" step="0.5" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Hours of Work</label>
+          <input type="number" id="pc-hours" value="20" min="0" step="0.5" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Your Hourly Rate ($)</label>
+          <input type="number" id="pc-rate" value="50" min="0" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Material Cost ($)</label>
+          <input type="number" id="pc-materials" value="80" min="0" step="0.01" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Overhead % (studio, tools)</label>
+          <input type="number" id="pc-overhead" value="15" min="0" max="100" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Gallery / Agent Commission %</label>
+          <input type="number" id="pc-commission" value="0" min="0" max="70" oninput="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label>Your Career Stage</label>
+          <select id="pc-stage" onchange="calcPrice()">
+            <option value="0.7">Emerging (0–3 yrs)</option>
+            <option value="1.0" selected>Developing (3–7 yrs)</option>
+            <option value="1.35">Established (7–15 yrs)</option>
+            <option value="1.8">Recognized (15+ yrs)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Market Tier</label>
+          <select id="pc-market" onchange="calcPrice()">
+            <option value="0.8">Local / Community</option>
+            <option value="1.0" selected>Regional</option>
+            <option value="1.4">National</option>
+            <option value="2.0">International</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Edition Size</label>
+          <select id="pc-edition" onchange="calcPrice()">
+            <option value="1.0" selected>Unique</option>
+            <option value="0.85">Edition of 2–5</option>
+            <option value="0.7">Edition of 6–25</option>
+            <option value="0.5">Edition of 26–100</option>
+            <option value="0.3">Open Edition</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pricing-result" id="price-result">
+        <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--warm-dark);margin-bottom:8px;">Suggested Pricing</div>
+        <div class="pricing-breakdown" id="price-breakdown"></div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="card" style="margin-bottom:0;">
+          <h3 style="font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;margin-bottom:12px;">Pricing Methods Compared</h3>
+          <div id="price-methods" style="font-size:0.82rem;line-height:1.8;color:var(--muted);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SHIPPING CALCULATOR ══════════════ -->
+<div class="panel" id="panel-shipping">
+  <div class="section-title">Shipping Calculator</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;" id="shipping-layout">
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:16px;">Shipment Details</h3>
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Art Type</label>
+          <select id="ship-type" onchange="calcShipping()" style="width:100%;">
+            <option value="unframed-print">Unframed Print (tube)</option>
+            <option value="small-canvas">Canvas — Small (≤16×20")</option>
+            <option value="medium-canvas">Canvas — Medium (≤24×30")</option>
+            <option value="large-canvas">Canvas — Large (≤36×48")</option>
+            <option value="xlarge-canvas">Canvas — XL (36×48"+)</option>
+            <option value="small-framed">Framed — Small (≤18")</option>
+            <option value="medium-framed">Framed — Medium (18–30")</option>
+            <option value="large-framed">Framed — Large (30"+)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Destination</label>
+          <select id="ship-dest" onchange="calcShipping()" style="width:100%;">
+            <option value="local">Local / Same State</option>
+            <option value="domestic">Domestic (US)</option>
+            <option value="intl">International</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-size:0.75rem;color:var(--muted);">Tap any rate below to copy it to your Quote Builder</label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pricing-result" id="ship-result-panel" style="padding:0;background:transparent;border:none;">
+        <div id="ship-results" style="font-size:0.85rem;"></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3 style="font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;margin-bottom:10px;">Packaging Tips</h3>
+        <div id="ship-tips" style="font-size:0.82rem;line-height:1.8;color:var(--muted);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ QUOTE BUILDER ══════════════ -->
+<div class="panel" id="panel-quote">
+  <div class="section-title">Client Quote Builder</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="quote-layout">
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:16px;">Quote Details</h3>
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Your Name / Studio Name</label>
+          <input type="text" id="q-artist" placeholder="Jane Doe Studio">
+        </div>
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" id="q-client" placeholder="Alex Smith">
+        </div>
+        <div class="form-group">
+          <label>Select Work from Inventory</label>
+          <select id="q-work-select" onchange="fillQuoteFromInventory()">
+            <option value="">— Choose a work —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Work Title</label>
+          <input type="text" id="q-title" placeholder="Title of Work">
+        </div>
+        <div class="form-group">
+          <label>Medium & Dimensions</label>
+          <input type="text" id="q-details" placeholder="Oil on canvas, 24 × 18 in">
+        </div>
+        <div class="form-group">
+          <label>Base Price ($)</label>
+          <input type="number" id="q-price" placeholder="0" oninput="buildQuote()">
+        </div>
+        <div class="form-group">
+          <label>Shipping / Framing Estimate ($)</label>
+          <input type="number" id="q-shipping" value="0" oninput="buildQuote()">
+        </div>
+        <div class="form-group">
+          <label>Tax % (if applicable)</label>
+          <input type="number" id="q-tax" value="0" oninput="buildQuote()">
+        </div>
+        <div class="form-group">
+          <label>Discount % (optional)</label>
+          <input type="number" id="q-discount" value="0" min="0" max="50" oninput="buildQuote()">
+        </div>
+        <div class="form-group">
+          <label>Payment Terms</label>
+          <select id="q-terms" onchange="buildQuote()">
+            <option value="Due upon receipt">Due upon receipt</option>
+            <option value="50% deposit, balance on delivery">50% deposit, balance on delivery</option>
+            <option value="Net 30">Net 30</option>
+            <option value="Net 15">Net 15</option>
+            <option value="3-month installment plan">3-month installment plan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes</label>
+          <textarea id="q-notes" placeholder="Certificate of authenticity included, installation not included…" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="buildQuote()">Generate Quote</button>
+        <button class="btn btn-ghost" onclick="copyQuote()">Copy Quote</button>
+      </div>
+    </div>
+    <div>
+      <div class="section-title" style="font-size:0.85rem;">Preview</div>
+      <div class="quote-output" id="quote-output">Your quote will appear here…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ANALYTICS ══════════════ -->
+<div class="panel" id="panel-analytics">
+  <div class="section-title">Studio Analytics</div>
+  <div class="stats-row" id="analytics-stats"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:12px;">By Medium</h3>
+      <div id="analytics-medium"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:12px;">By Status</h3>
+      <div id="analytics-status"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px;">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:12px;">All Works — Table View</h3>
+    <div style="overflow-x:auto;">
+      <table id="analytics-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Year</th>
+            <th>Medium</th>
+            <th>Dims</th>
+            <th>Price</th>
+            <th>Cost</th>
+            <th>Margin</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="analytics-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Work</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <input type="hidden" id="edit-id">
+        <div class="form-group"><label>Title</label><input type="text" id="edit-title"></div>
+        <div class="form-group"><label>Year</label><input type="number" id="edit-year"></div>
+        <div class="form-group"><label>Medium</label><input type="text" id="edit-medium"></div>
+        <div class="form-group"><label>Dimensions</label><input type="text" id="edit-dims"></div>
+        <div class="form-group"><label>Edition</label>
+          <select id="edit-edition">
+            <option value="unique">Unique</option><option value="2">Edition of 2</option>
+            <option value="5">Edition of 5</option><option value="10">Edition of 10</option>
+            <option value="25">Edition of 25</option><option value="50">Edition of 50</option>
+            <option value="100">Edition of 100</option><option value="open">Open Edition</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="edit-status">
+            <option value="available">Available</option><option value="reserved">Reserved</option>
+            <option value="sold">Sold</option><option value="nfs">Not for Sale</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Asking Price ($)</label><input type="number" id="edit-price"></div>
+        <div class="form-group"><label>Material Cost ($)</label><input type="number" id="edit-materials"></div>
+        <div class="form-group"><label>Hours</label><input type="number" id="edit-hours"></div>
+        <div class="form-group"><label>Series</label><input type="text" id="edit-series"></div>
+        <div class="form-group"><label>Location</label><input type="text" id="edit-location"></div>
+        <div class="form-group">
+          <label>Image</label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label for="edit-image-file" class="btn btn-ghost" style="cursor:pointer;justify-content:center;font-size:0.82rem;padding:9px 12px;text-align:center;border-radius:var(--radius);">
+              📷 Upload Photo
+            </label>
+            <input type="file" id="edit-image-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'edit-image-preview','edit-image-data')">
+            <div id="edit-image-preview" style="display:none;position:relative;">
+              <img id="edit-image-preview-img" src="" alt="Preview" style="width:100%;max-height:140px;object-fit:cover;border-radius:var(--radius);border:1.5px solid var(--warm-mid);">
+              <button type="button" onclick="clearImageUpload('edit-image-file','edit-image-preview','edit-image-data')" style="position:absolute;top:4px;right:4px;background:rgba(26,23,20,0.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;line-height:22px;text-align:center;">✕</button>
+            </div>
+            <input type="hidden" id="edit-image-data" value="">
+            <input type="hidden" id="edit-image" value="">
+          </div>
+        </div>
+        <div class="form-group full"><label>Notes</label><textarea id="edit-notes"></textarea></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+        <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA STORE ──────────────────────────────────────────────
+let works = JSON.parse(localStorage.getItem('studioLedger') || '[]');
+
+function save() { localStorage.setItem('studioLedger', JSON.stringify(works)); }
+
+// ── SAMPLE DATA (first run) ──────────────────────────────────
+if (works.length === 0) {
+  works = [
+    { id: 1, title: 'Morning Fog Study', year: 2023, medium: 'Oil on canvas', dims: '18 × 14', edition: 'unique', status: 'available', price: 980, materials: 45, hours: 18, series: 'Coastal Studies', location: 'Studio A', image: '', notes: 'Plein-air study from Marin County.', created: Date.now() - 86400000 * 30 },
+    { id: 2, title: 'Still Life with Persimmons', year: 2024, medium: 'Oil on canvas', dims: '24 × 18', edition: 'unique', status: 'sold', price: 1450, materials: 65, hours: 24, series: '', location: 'Sold', image: '', notes: 'Sold to private collector Jan 2024.', created: Date.now() - 86400000 * 10 },
+    { id: 3, title: 'Grid Study #4', year: 2024, medium: 'Graphite on paper', dims: '11 × 8.5', edition: '10', status: 'available', price: 280, materials: 8, hours: 6, series: 'Grid Studies', location: 'Portfolio Box', image: '', notes: 'Edition of 10 — 3 sold.', created: Date.now() - 86400000 * 5 },
+  ];
+  save();
+}
+
+let nextId = works.length ? Math.max(...works.map(w => w.id)) + 1 : 1;
+
+// ── TABS ────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'inventory') renderInventory();
+  if (id === 'pricing') calcPrice();
+  if (id === 'shipping') calcShipping();
+  if (id === 'quote') { populateQuoteSelect(); buildQuote(); }
+  if (id === 'analytics') renderAnalytics();
+  updateHeader();
+}
+
+// ── HEADER STATS ─────────────────────────────────────────────
+function updateHeader() {
+  const total = works.length;
+  const portfolioVal = works.filter(w => w.status !== 'sold').reduce((s, w) => s + (w.price || 0), 0);
+  const soldVal = works.filter(w => w.status === 'sold').reduce((s, w) => s + (w.price || 0), 0);
+  document.getElementById('hstat-total').textContent = total;
+  document.getElementById('hstat-value').textContent = '$' + portfolioVal.toLocaleString();
+  document.getElementById('hstat-sold').textContent = '$' + soldVal.toLocaleString();
+}
+updateHeader();
+
+// ── INVENTORY ───────────────────────────────────────────────
+function renderInventory() {
+  const q = document.getElementById('search-inv').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const medium = document.getElementById('filter-medium').value;
+  const sort = document.getElementById('sort-inv').value;
+  const view = document.getElementById('view-toggle').value;
+
+  // Populate medium filter
+  const mediums = [...new Set(works.map(w => w.medium).filter(Boolean))];
+  const mSel = document.getElementById('filter-medium');
+  const mCur = mSel.value;
+  mSel.innerHTML = '<option value="">All Mediums</option>' + mediums.map(m => `<option value="${m}" ${m===mCur?'selected':''}>${m}</option>`).join('');
+
+  let list = works.filter(w => {
+    if (q && !`${w.title} ${w.medium} ${w.series}`.toLowerCase().includes(q)) return false;
+    if (status && w.status !== status) return false;
+    if (medium && w.medium !== medium) return false;
+    return true;
+  });
+
+  if (sort === 'newest') list.sort((a, b) => b.created - a.created);
+  if (sort === 'price-hi') list.sort((a, b) => (b.price||0) - (a.price||0));
+  if (sort === 'price-lo') list.sort((a, b) => (a.price||0) - (b.price||0));
+  if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title));
+
+  const out = document.getElementById('inventory-output');
+
+  if (!list.length) {
+    out.innerHTML = '<div class="empty-state"><div class="icon">🎨</div><p>No works match your filters. Try adding some in <strong>Add Work</strong>.</p></div>';
+    return;
+  }
+
+  if (view === 'grid') {
+    out.innerHTML = `<div class="works-grid">${list.map(workCard).join('')}</div>`;
+  } else {
+    out.innerHTML = `
+      <div style="overflow-x:auto;"><table>
+        <thead><tr><th>Title</th><th>Year</th><th>Medium</th><th>Dims</th><th>Edition</th><th>Price</th><th>Status</th><th></th></tr></thead>
+        <tbody>${list.map(workRow).join('')}</tbody>
+      </table></div>`;
+  }
+}
+
+function tagHTML(status) {
+  const map = { available: 'Available', sold: 'Sold', reserved: 'Reserved', nfs: 'NFS' };
+  return `<span class="tag tag-${status}">${map[status]||status}</span>`;
+}
+
+function workCard(w) {
+  const img = w.image ? `<img src="${w.image}" alt="${w.title}" onerror="this.parentElement.innerHTML='No image'">` : 'No image';
+  const priceDisplay = w.status === 'nfs' ? 'NFS' : w.price ? '$' + Number(w.price).toLocaleString() : '—';
+  return `<div class="work-card">
+    <div class="work-card-img">${img}</div>
+    <div class="work-card-body">
+      <div class="work-card-title">${w.title}</div>
+      <div class="work-card-meta">${w.year} · ${w.medium}${w.dims ? ' · ' + w.dims + ' in' : ''}${w.edition !== 'unique' ? ' · Ed. ' + w.edition : ''}</div>
+      <div class="work-card-price">${priceDisplay}</div>
+      <div style="margin-bottom:8px;">${tagHTML(w.status)}</div>
+      <div class="work-card-actions">
+        <button class="btn btn-ghost" style="font-size:0.72rem;padding:5px 10px;" onclick="openEdit(${w.id})">Edit</button>
+        <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 10px;" onclick="deleteWork(${w.id})">Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function workRow(w) {
+  const cost = (w.materials||0) + (w.hours||0) * 0; // margin just on materials here
+  const margin = w.price && w.materials ? Math.round(((w.price - w.materials) / w.price) * 100) : '—';
+  return `<tr>
+    <td><div class="td-title">${w.title}</div><div class="td-sub">${w.series||''}</div></td>
+    <td>${w.year}</td>
+    <td>${w.medium}</td>
+    <td style="white-space:nowrap;">${w.dims||'—'}</td>
+    <td>${w.edition==='unique'?'Unique':'Ed. '+w.edition}</td>
+    <td style="font-family:'DM Mono',monospace;">${w.price ? '$'+Number(w.price).toLocaleString() : '—'}</td>
+    <td>${tagHTML(w.status)}</td>
+    <td><button class="btn btn-ghost" style="font-size:0.72rem;padding:4px 8px;" onclick="openEdit(${w.id})">Edit</button></td>
+  </tr>`;
+}
+
+// ── ADD WORK ────────────────────────────────────────────────
+function addWork() {
+  const title = document.getElementById('add-title').value.trim();
+  const year = document.getElementById('add-year').value;
+  const medium = document.getElementById('add-medium').value.trim();
+  if (!title || !year || !medium) {
+    document.getElementById('add-feedback').innerHTML = '<span style="color:#d44;">Please fill in Title, Year, and Medium.</span>';
+    return;
+  }
+  const w = {
+    id: nextId++,
+    title,
+    year: parseInt(year),
+    medium,
+    dims: document.getElementById('add-dims').value.trim(),
+    edition: document.getElementById('add-edition').value,
+    status: document.getElementById('add-status').value,
+    price: parseFloat(document.getElementById('add-price').value) || 0,
+    materials: parseFloat(document.getElementById('add-materials').value) || 0,
+    hours: parseFloat(document.getElementById('add-hours').value) || 0,
+    series: document.getElementById('add-series').value.trim(),
+    location: document.getElementById('add-location').value.trim(),
+    image: document.getElementById('add-image-data').value || '',
+    notes: document.getElementById('add-notes').value.trim(),
+    created: Date.now(),
+  };
+  works.unshift(w);
+  save();
+  updateHeader();
+  document.getElementById('add-feedback').innerHTML = `<span style="color:var(--success);">✓ "${w.title}" added to inventory.</span>`;
+  clearAddForm(true);
+}
+
+function clearAddForm(keepFeedback) {
+  ['add-title','add-year','add-medium','add-dims','add-price','add-materials','add-hours','add-series','add-location','add-notes'].forEach(id => document.getElementById(id).value = '');
+  clearImageUpload('add-image-file','add-image-preview','add-image-data');
+  document.getElementById('add-edition').value = 'unique';
+  document.getElementById('add-status').value = 'available';
+  if (!keepFeedback) document.getElementById('add-feedback').innerHTML = '';
+}
+
+// ── EDIT / DELETE ────────────────────────────────────────────
+function openEdit(id) {
+  const w = works.find(x => x.id === id);
+  if (!w) return;
+  document.getElementById('edit-id').value = id;
+  ['title','year','medium','dims','status','price','materials','hours','series','location','image','notes','edition'].forEach(f => {
+    const el = document.getElementById('edit-' + f);
+    if (el) el.value = w[f] !== undefined ? w[f] : '';
+  });
+  // Populate existing image in edit modal
+  const editPreviewEl = document.getElementById('edit-image-preview');
+  const editPreviewImgEl = document.getElementById('edit-image-preview-img');
+  document.getElementById('edit-image-data').value = '';
+  document.getElementById('edit-image').value = w.image || '';
+  if (w.image) {
+    editPreviewImgEl.src = w.image;
+    editPreviewEl.style.display = 'block';
+  } else {
+    editPreviewEl.style.display = 'none';
+    editPreviewImgEl.src = '';
+  }
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+
+function saveEdit() {
+  const id = parseInt(document.getElementById('edit-id').value);
+  const idx = works.findIndex(w => w.id === id);
+  if (idx < 0) return;
+  ['title','medium','dims','series','location','notes'].forEach(f => works[idx][f] = document.getElementById('edit-' + f).value.trim());
+  const newImg = document.getElementById('edit-image-data').value;
+  if (newImg) works[idx].image = newImg;
+  ['price','materials','hours'].forEach(f => works[idx][f] = parseFloat(document.getElementById('edit-' + f).value) || 0);
+  works[idx].year = parseInt(document.getElementById('edit-year').value);
+  works[idx].status = document.getElementById('edit-status').value;
+  works[idx].edition = document.getElementById('edit-edition').value;
+  save(); closeEditModal(); renderInventory(); updateHeader();
+}
+
+function deleteWork(id) {
+  if (!confirm('Remove this work from your inventory?')) return;
+  works = works.filter(w => w.id !== id);
+  save(); renderInventory(); updateHeader();
+}
+
+// ── PRICING CALCULATOR ───────────────────────────────────────
+function calcPrice() {
+  const h = parseFloat(document.getElementById('pc-h').value) || 0;
+  const w = parseFloat(document.getElementById('pc-w').value) || 0;
+  const hours = parseFloat(document.getElementById('pc-hours').value) || 0;
+  const rate = parseFloat(document.getElementById('pc-rate').value) || 0;
+  const mats = parseFloat(document.getElementById('pc-materials').value) || 0;
+  const overhead = parseFloat(document.getElementById('pc-overhead').value) / 100 || 0;
+  const comm = parseFloat(document.getElementById('pc-commission').value) / 100 || 0;
+  const stage = parseFloat(document.getElementById('pc-stage').value);
+  const market = parseFloat(document.getElementById('pc-market').value);
+  const edition = parseFloat(document.getElementById('pc-edition').value);
+
+  // Method 1: Cost + Labor
+  const labor = hours * rate;
+  const overheadAmt = (labor + mats) * overhead;
+  const baseCost = labor + mats + overheadAmt;
+  const method1 = baseCost * stage * market * edition;
+  const method1WithComm = comm > 0 ? method1 / (1 - comm) : method1;
+
+  // Method 2: Per Square Inch × multipliers
+  const sqIn = h * w;
+  const basePerSqIn = 2.5 * stage * market;
+  const method2 = sqIn * basePerSqIn * edition;
+  const method2WithComm = comm > 0 ? method2 / (1 - comm) : method2;
+
+  // Recommended = weighted blend
+  const recommended = (method1WithComm * 0.6 + method2WithComm * 0.4);
+  const low = recommended * 0.85;
+  const high = recommended * 1.2;
+
+  const fmt = n => '$' + Math.round(n).toLocaleString();
+
+  document.getElementById('price-breakdown').innerHTML = `
+    <div class="price-line"><span>Labor (${hours}h × $${rate}/h)</span><span>${fmt(labor)}</span></div>
+    <div class="price-line"><span>Materials</span><span>${fmt(mats)}</span></div>
+    <div class="price-line"><span>Overhead (${(overhead*100).toFixed(0)}%)</span><span>${fmt(overheadAmt)}</span></div>
+    ${comm > 0 ? `<div class="price-line"><span>Gallery markup (${(comm*100).toFixed(0)}% commission)</span><span>+${fmt(method1WithComm - method1)}</span></div>` : ''}
+    <div class="price-line"><span>Career & market multiplier</span><span>×${(stage * market * edition).toFixed(2)}</span></div>
+    <div class="price-line total"><span>Recommended</span><span>${fmt(recommended)}</span></div>
+    <div class="price-range">Range: ${fmt(low)} – ${fmt(high)}</div>
+  `;
+
+  document.getElementById('price-methods').innerHTML = `
+    <div style="display:grid;gap:8px;">
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--canvas);border-radius:4px;">
+        <span>Cost + Labor method</span><strong style="font-family:'DM Mono',monospace;">${fmt(method1WithComm)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--canvas);border-radius:4px;">
+        <span>Per-square-inch method (${h}×${w}=${sqIn} in²)</span><strong style="font-family:'DM Mono',monospace;">${fmt(method2WithComm)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--accent-lt);border-radius:4px;color:var(--accent);font-weight:600;">
+        <span>Blended recommendation</span><span style="font-family:'DM Mono',monospace;">${fmt(recommended)}</span>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:0.75rem;line-height:1.7;">Tip: price consistency matters. Once you establish a per-square-inch rate, don't undercut it on similar works — it erodes collector trust.</p>
+  `;
+}
+calcPrice();
+
+// ── SHIPPING CALCULATOR ──────────────────────────────────────────
+const SHIP_RATES = {
+  // [USPS retail, Pirate Ship (discounted USPS), UPS Ground, FedEx Ground]
+  'unframed-print': {
+    local:    [9,  7,  11, 10],
+    domestic: [14, 10, 16, 15],
+    intl:     [38, 32, 55, 50]
+  },
+  'small-canvas': {
+    local:    [18, 14, 20, 19],
+    domestic: [28, 20, 32, 30],
+    intl:     [75, 62, 95, 88]
+  },
+  'medium-canvas': {
+    local:    [28, 22, 32, 30],
+    domestic: [45, 34, 52, 48],
+    intl:     [110, 90, 140, 128]
+  },
+  'large-canvas': {
+    local:    [45, 36, 55, 50],
+    domestic: [75, 58, 90, 82],
+    intl:     [175, 145, 220, 200]
+  },
+  'xlarge-canvas': {
+    local:    [80, 65, 100, 92],
+    domestic: [130, 105, 160, 148],
+    intl:     [280, 240, 360, 330]
+  },
+  'small-framed': {
+    local:    [22, 17, 26, 24],
+    domestic: [35, 26, 42, 38],
+    intl:     [90, 74, 115, 105]
+  },
+  'medium-framed': {
+    local:    [38, 30, 46, 42],
+    domestic: [62, 48, 75, 68],
+    intl:     [148, 122, 185, 170]
+  },
+  'large-framed': {
+    local:    [68, 55, 82, 76],
+    domestic: [110, 88, 135, 124],
+    intl:     [260, 215, 330, 300]
+  }
+};
+
+const SHIP_TIPS = {
+  'unframed-print': 'Roll print in acid-free tissue, insert into a rigid mailing tube. Seal both ends with plastic end caps. Mark “Do Not Bend”. For international, declare as “Artwork — No Commercial Value”.',
+  'small-canvas':   'Wrap in glassine paper, then bubble wrap. Use a flat box with foam corners. For stretched canvas, protect with cardboard corner guards. 2” of padding on all sides.',
+  'medium-canvas':  'Double-box recommended: inner box snug around canvas, outer box with 2” foam/bubble wrap all sides. Use “Fragile” and “This Side Up” labels.',
+  'large-canvas':   'Consider a custom crate for works over 30”. Use foam-lined wooden crate or professional art shipping box. Pirate Ship or UPS are best for oversized — USPS has size limits.',
+  'xlarge-canvas':  'Wooden crate strongly recommended. Contact a local art shipper or freight service for works over 48”. Pirate Ship + UPS Freight is cost-effective for domestic.',
+  'small-framed':   'Wrap glass/acrylic with painter’s tape in an X pattern before wrapping. Use foam corner protectors. Double-box with 2” padding. Mark “Fragile — Glass”.',
+  'medium-framed':  'Tape glass in X, wrap in glassine then bubble wrap. Use a mirror/picture box (available at UPS Store). Double-box for anything over 20”. FedEx and UPS handle framed work well.',
+  'large-framed':   'Wooden crate or professional art crating service recommended. Remove glass if possible and ship separately. Pirate Ship + UPS Ground is most cost-effective domestically.'
+};
+
+function calcShipping() {
+  const typeEl = document.getElementById('ship-type');
+  const destEl = document.getElementById('ship-dest');
+  if (!typeEl || !destEl) return;
+  const type = typeEl.value;
+  const dest = destEl.value;
+  const rates = SHIP_RATES[type]?.[dest];
+  if (!rates) return;
+  const [usps, pirate, ups, fedex] = rates;
+  const carriers = [
+    { name: 'Pirate Ship (USPS) ★', rate: pirate, note: 'Best value — up to 89% off retail USPS rates', best: true },
+    { name: 'USPS Retail',           rate: usps,   note: 'Priority Mail / Priority Mail Express est.' },
+    { name: 'UPS Ground',            rate: ups,    note: '3–5 business days' },
+    { name: 'FedEx Ground',          rate: fedex,  note: '3–5 business days' },
+  ];
+  const resultsEl = document.getElementById('ship-results');
+  if (resultsEl) {
+    resultsEl.innerHTML = carriers.map(c => `
+      <div onclick="useShippingRate(${c.rate})" style="
+        display:flex;justify-content:space-between;align-items:center;
+        padding:12px 14px;margin-bottom:8px;
+        background:${c.best ? 'rgba(192,92,42,0.07)' : 'white'};
+        border:1.5px solid ${c.best ? 'var(--accent)' : 'var(--warm-mid)'};
+        border-radius:var(--radius);cursor:pointer;
+      ">
+        <div>
+          <div style="font-weight:${c.best ? '600' : '400'};color:${c.best ? 'var(--accent)' : 'var(--ink)'}">${c.name}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${c.note}</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;">~$${c.rate}</div>
+      </div>
+    `).join('') + `<div style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.6;">Estimates based on 2025–2026 carrier rates. Actual cost varies by exact weight, dimensions, and destination zone. Tap a row to copy the amount to your Quote Builder.</div>`;
+  }
+  const tipsEl = document.getElementById('ship-tips');
+  if (tipsEl) tipsEl.textContent = SHIP_TIPS[type] || '';
+}
+
+function useShippingRate(amount) {
+  // Switch to Quote Builder tab and fill shipping field
+  const quoteBtn = document.querySelector('.tab-btn[onclick*="quote"]');
+  showTab('quote', quoteBtn);
+  setTimeout(() => {
+    const el = document.getElementById('q-shipping');
+    if (el) {
+      el.value = amount;
+      buildQuote();
+      el.style.background = '#d4edda';
+      setTimeout(() => el.style.background = '', 900);
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
+}
+
+// ── QUOTE BUILDER ────────────────────────────────────────────
+function populateQuoteSelect() {
+  const sel = document.getElementById('q-work-select');
+  sel.innerHTML = '<option value="">— Choose a work —</option>' + works.map(w => `<option value="${w.id}">${w.title} (${w.year})</option>`).join('');
+}
+
+function fillQuoteFromInventory() {
+  const id = parseInt(document.getElementById('q-work-select').value);
+  if (!id) return;
+  const w = works.find(x => x.id === id);
+  if (!w) return;
+  document.getElementById('q-title').value = w.title;
+  document.getElementById('q-details').value = `${w.medium}${w.dims ? ', ' + w.dims + ' in' : ''}${w.edition !== 'unique' ? ', Ed. ' + w.edition : ''}`;
+  document.getElementById('q-price').value = w.price || '';
+  buildQuote();
+}
+
+function buildQuote() {
+  const artist = document.getElementById('q-artist').value || 'Your Studio';
+  const client = document.getElementById('q-client').value || 'Valued Collector';
+  const title = document.getElementById('q-title').value || 'Untitled Work';
+  const details = document.getElementById('q-details').value || '';
+  const price = parseFloat(document.getElementById('q-price').value) || 0;
+  const shipping = parseFloat(document.getElementById('q-shipping').value) || 0;
+  const taxPct = parseFloat(document.getElementById('q-tax').value) || 0;
+  const discountPct = parseFloat(document.getElementById('q-discount').value) || 0;
+  const terms = document.getElementById('q-terms').value;
+  const notes = document.getElementById('q-notes').value;
+
+  const discount = price * (discountPct / 100);
+  const subtotal = price - discount + shipping;
+  const tax = subtotal * (taxPct / 100);
+  const total = subtotal + tax;
+  const fmt = n => '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  const out = `QUOTE / SALES INVOICE
+${'─'.repeat(44)}
+From:    ${artist}
+To:      ${client}
+Date:    ${today}
+Quote #: Q-${Date.now().toString().slice(-6)}
+
+WORK
+${'─'.repeat(44)}
+Title:   ${title}
+${details ? 'Details: ' + details : ''}
+
+PRICING
+${'─'.repeat(44)}
+Base price               ${fmt(price)}${discountPct > 0 ? `
+Discount (${discountPct}%)         -${fmt(discount)}` : ''}${shipping > 0 ? `
+Shipping / Framing       ${fmt(shipping)}` : ''}${taxPct > 0 ? `
+Tax (${taxPct}%)                  ${fmt(tax)}` : ''}
+${'─'.repeat(44)}
+TOTAL                    ${fmt(total)}
+
+PAYMENT TERMS
+${'─'.repeat(44)}
+${terms}
+${notes ? '\nNOTES\n' + '─'.repeat(44) + '\n' + notes : ''}
+
+${'─'.repeat(44)}
+Thank you for supporting original art.
+This quote is valid for 30 days.`;
+
+  document.getElementById('quote-output').textContent = out;
+}
+
+function copyQuote() {
+  const text = document.getElementById('quote-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Quote', 1500);
+  });
+}
+
+// ── ANALYTICS ───────────────────────────────────────────────
+function renderAnalytics() {
+  const total = works.length;
+  const available = works.filter(w => w.status === 'available').length;
+  const sold = works.filter(w => w.status === 'sold').length;
+  const totalSold = works.filter(w => w.status === 'sold').reduce((s, w) => s + (w.price||0), 0);
+  const portfolioVal = works.filter(w => w.status !== 'sold').reduce((s, w) => s + (w.price||0), 0);
+  const totalHours = works.reduce((s, w) => s + (w.hours||0), 0);
+  const avgPrice = total ? works.filter(w => w.price).reduce((s,w) => s + w.price, 0) / works.filter(w => w.price).length : 0;
+
+  document.getElementById('analytics-stats').innerHTML = [
+    { val: total, lbl: 'Total Works' },
+    { val: available, lbl: 'Available' },
+    { val: sold, lbl: 'Works Sold' },
+    { val: '$' + Math.round(portfolioVal).toLocaleString(), lbl: 'Portfolio Value' },
+    { val: '$' + Math.round(totalSold).toLocaleString(), lbl: 'Revenue' },
+    { val: Math.round(totalHours) + 'h', lbl: 'Studio Hours' },
+    { val: '$' + Math.round(avgPrice).toLocaleString(), lbl: 'Avg. Price' },
+  ].map(s => `<div class="stat-box"><div class="val">${s.val}</div><div class="lbl">${s.lbl}</div></div>`).join('');
+
+  // By medium
+  const byMedium = {};
+  works.forEach(w => { if (w.medium) byMedium[w.medium] = (byMedium[w.medium]||0) + 1; });
+  document.getElementById('analytics-medium').innerHTML = Object.entries(byMedium)
+    .sort((a,b) => b[1]-a[1])
+    .map(([m, c]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--warm-mid);font-size:0.83rem;">
+      <span>${m}</span>
+      <span style="font-family:'DM Mono',monospace;font-weight:500;">${c} work${c>1?'s':''}</span>
+    </div>`).join('') || '<p style="color:var(--muted);font-size:0.85rem;">No data yet.</p>';
+
+  // By status
+  const byStatus = { available: 0, sold: 0, reserved: 0, nfs: 0 };
+  works.forEach(w => { if (byStatus[w.status] !== undefined) byStatus[w.status]++; });
+  const statusLabels = { available: 'Available', sold: 'Sold', reserved: 'Reserved', nfs: 'Not for Sale' };
+  document.getElementById('analytics-status').innerHTML = Object.entries(byStatus)
+    .map(([s, c]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--warm-mid);font-size:0.83rem;">
+      <span>${tagHTML(s)} ${statusLabels[s]}</span>
+      <span style="font-family:'DM Mono',monospace;font-weight:500;">${c}</span>
+    </div>`).join('');
+
+  // Table
+  document.getElementById('analytics-tbody').innerHTML = works.map(w => {
+    const margin = w.price && w.materials ? Math.round(((w.price - w.materials) / w.price) * 100) : '—';
+    return `<tr>
+      <td><div class="td-title">${w.title}</div></td>
+      <td>${w.year}</td>
+      <td style="font-size:0.78rem;">${w.medium}</td>
+      <td style="font-size:0.78rem;white-space:nowrap;">${w.dims||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;">${w.price ? '$'+Number(w.price).toLocaleString() : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;">${w.materials ? '$'+Number(w.materials).toLocaleString() : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:${typeof margin==='number'&&margin<0?'#d44':'var(--success)'};">${typeof margin === 'number' ? margin + '%' : '—'}</td>
+      <td>${tagHTML(w.status)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">No works yet.</td></tr>';
+}
+
+// ── IMAGE UPLOAD HELPERS ─────────────────────────────────────
+function handleImageUpload(input, previewId, dataId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    document.getElementById(dataId).value = dataUrl;
+    const preview = document.getElementById(previewId);
+    const previewImg = document.getElementById(previewId + '-img');
+    previewImg.src = dataUrl;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearImageUpload(fileId, previewId, dataId) {
+  const fi = document.getElementById(fileId);
+  if (fi) fi.value = '';
+  document.getElementById(dataId).value = '';
+  const preview = document.getElementById(previewId);
+  const previewImg = document.getElementById(previewId + '-img');
+  if (preview) preview.style.display = 'none';
+  if (previewImg) previewImg.src = '';
+}
+
+// ── RESPONSIVE PRICING LAYOUT ────────────────────────────────
+function checkLayout() {
+  const narrow = window.innerWidth < 700;
+  ['pricing-layout','shipping-layout','quote-layout'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.gridTemplateColumns = narrow ? '1fr' : '1fr 1fr';
+  });
+}
+window.addEventListener('resize', checkLayout);
+checkLayout();
+
+// Init
+renderInventory();
+populateQuoteSelect();
+buildQuote();
+</script>
+</body>
+</html>
