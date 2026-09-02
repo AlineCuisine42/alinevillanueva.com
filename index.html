@@ -1372,7 +1372,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
 
 /* MOBILE */
 @media(max-width:768px){
-  nav{padding:14px 16px;}
+  nav{padding:14px 16px;flex-wrap:wrap;row-gap:8px;}
   .nav-links{gap:10px;}
   .nav-links a{font-size:10px;letter-spacing:.10em;}
   .nav-amv{font-size:11px;letter-spacing:.14em;}
@@ -1560,6 +1560,42 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   color: #f7f4ef;
 }
 
+/* ── SITE MANAGER PANEL ── */
+.sm-wrap{max-width:760px;margin:0 auto;padding:32px 24px 80px;color:#1a1714;font-family:'DM Sans',sans-serif;}
+.sm-intro{font-size:0.85rem;color:#7a7269;margin-bottom:28px;line-height:1.6;}
+.sm-section{background:#fff;border:1px solid #e8e2d8;border-radius:6px;padding:20px 22px;margin-bottom:18px;box-shadow:0 2px 12px rgba(26,23,20,0.05);}
+.sm-sec-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.sm-sec-title{font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:400;}
+.sm-sec-note{font-size:0.72rem;color:#7a7269;letter-spacing:0.04em;}
+.sm-field{margin-top:14px;}
+.sm-field label{display:block;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:#7a7269;margin-bottom:5px;}
+.sm-field input[type=text],.sm-field input[type=email],.sm-field textarea{
+  width:100%;border:1px solid #e8e2d8;border-radius:4px;padding:9px 11px;
+  font-family:'DM Sans',sans-serif;font-size:0.88rem;color:#1a1714;background:#f7f4ef;
+}
+.sm-field textarea{min-height:90px;resize:vertical;line-height:1.55;}
+.sm-field input:focus,.sm-field textarea:focus{outline:none;border-color:#c05c2a;background:#fff;}
+.sm-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.sm-row{grid-template-columns:1fr;}}
+.sm-actions{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap;}
+.sm-btn{background:#c05c2a;color:#fff;border:none;border-radius:4px;padding:9px 20px;
+  font-family:'DM Sans',sans-serif;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;}
+.sm-btn:hover{background:#a84d20;}
+.sm-btn.secondary{background:transparent;color:#7a7269;border:1px solid #c9bfb0;}
+.sm-btn.secondary:hover{color:#1a1714;border-color:#1a1714;}
+.sm-status{font-family:'DM Mono',monospace;font-size:0.7rem;color:#3a7a58;}
+.sm-toggle{position:relative;display:inline-block;width:44px;height:24px;flex:0 0 auto;}
+.sm-toggle input{opacity:0;width:0;height:0;}
+.sm-track{position:absolute;inset:0;background:#c9bfb0;border-radius:24px;transition:background .2s;cursor:pointer;}
+.sm-track:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;}
+.sm-toggle input:checked + .sm-track{background:#3a7a58;}
+.sm-toggle input:checked + .sm-track:before{transform:translateX(20px);}
+.sm-file{display:none;}
+.sm-file-label{display:inline-block;border:1px dashed #c9bfb0;border-radius:4px;padding:14px;text-align:center;
+  font-size:0.8rem;color:#7a7269;cursor:pointer;width:100%;margin-top:14px;transition:border-color .15s,color .15s;}
+.sm-file-label:hover{border-color:#c05c2a;color:#c05c2a;}
+.sm-current{font-size:0.75rem;color:#3a7a58;margin-top:8px;word-break:break-all;}
+.sm-hint{font-size:0.72rem;color:#7a7269;margin-top:6px;line-height:1.5;font-style:italic;}
 /* ── PRIVATE PANELS ── */
 .private-panel { display: none; }
 .private-panel.active { display: block; }
@@ -2501,9 +2537,9 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   <img class="hero-img" id="hero-img" src="" alt="Aline Marbella Villanueva" style="opacity:0;transition:opacity .5s;">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <span class="hero-eyebrow">Artist · Mississippi, USA</span>
-    <h1 class="hero-name">Aline<br><em>Marbella</em><br>Villanueva</h1>
-    <p class="hero-bio">Villa Nueva Art Studio — a gallery of evolving art, a living collection that changes as it sells.</p>
+    <span class="hero-eyebrow" id="hero-eyebrow">Artist · Mississippi, USA</span>
+    <h1 class="hero-name" id="hero-name">Aline<br><em>Marbella</em><br>Villanueva</h1>
+    <p class="hero-bio" id="hero-bio">Villa Nueva Art Studio — a gallery of evolving art, a living collection that changes as it sells.</p>
   </div>
 </section>
 
@@ -2548,7 +2584,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
       <strong>Represented by</strong>
       Available for representation
     </div>
-    <div class="statement-text">
+    <div class="statement-text" id="statement-text">
       <p>I paint the threshold — the place where the world you can see meets the world you can only feel.</p>
       <p>For me, that threshold is often literal: a backyard, a neighbor's fence line, the quiet edge of domestic life. I'm drawn to the people just past that boundary — a grandchild, a neighbor, a soldier home from deployment, a face half-remembered from a family photo. These aren't grand subjects. They're intimate ones. But painted closely enough, they open onto something larger: what a place or a person holds beneath the surface, what gets left behind, what almost isn't visible until you stay with it long enough.</p>
       <p>My process mirrors that idea. Some paintings arrive in a single sitting, direct from life. Most are built slowly — mark upon mark, each layer shaped by what came before it. I'm less interested in inventing an image than in letting one reveal itself through accumulation, the way memory does.</p>
@@ -2564,7 +2600,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   <div class="cv-grid">
     <div>
       <p class="cv-section-title">Education</p>
-      <ul class="exh-list">
+      <ul class="exh-list" id="education-list">
         <li class="exh-item">
           <span class="exh-year">2012</span>
           <div><p class="exh-title">Bachelor of Interdisciplinary Studies</p><p class="exh-venue">University of Southern Mississippi, Long Beach, MS</p></div>
@@ -2582,11 +2618,11 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
           <div><p class="exh-title">Delaware College of Art and Design</p><p class="exh-venue">Wilmington, DE</p></div>
         </li>
       </ul>
-      <a class="cv-download" href="Aline-Marbella-Villanueva-CV.pdf" download="Aline-Marbella-Villanueva-CV.pdf">&#8595; Download Full CV</a>
+      <a class="cv-download" id="cv-download-btn" href="Aline-Marbella-Villanueva-CV.pdf" download="Aline-Marbella-Villanueva-CV.pdf">&#8595; Download Full CV</a>
     </div>
     <div>
       <p class="cv-section-title">Selected Exhibitions</p>
-      <ul class="exh-list">
+      <ul class="exh-list" id="exhibitions-list">
         <li class="exh-item">
           <span class="exh-year">2022–2023</span>
           <div><p class="exh-title">Master Copy Exhibitions</p><p class="exh-venue">Gulfport Galleria, Gulfport, MS</p></div>
@@ -2618,7 +2654,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   <div class="acquire-inner">
     <div>
       <h2 class="acquire-heading">Let us<br><em>begin</em><br>a conversation.</h2>
-            <a class="acquire-email" href="/cdn-cgi/l/email-protection#30515c59555e6f46595c5c5104027059535c5f45541e535f5d"><span class="__cf_email__" data-cfemail="e584898c808bba938c898984d1d7a58c86898a9081cb868a88">[email&#160;protected]</span></a>
+            <a class="acquire-email" id="acquire-email" href="/cdn-cgi/l/email-protection#30515c59555e6f46595c5c5104027059535c5f45541e535f5d"><span class="__cf_email__" data-cfemail="e584898c808bba938c898984d1d7a58c86898a9081cb868a88">[email&#160;protected]</span></a>
       <div class="social-links" aria-label="Follow Aline Marbella Villanueva">
         <p class="social-label">Follow the studio</p>
         <div class="social-buttons">
@@ -2642,7 +2678,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
       <p style="font-size:11px;letter-spacing:.06em;color:rgba(247,247,245,.4);font-style:italic;margin:6px 0 20px;">Shipping &amp; handling not included in listed prices.</p>
       <p style="font-size:11px;letter-spacing:.06em;color:rgba(247,247,245,.4);font-style:italic;margin:20px 0 0;line-height:1.8;">Commissions are welcomed. A 20% deposit is required to reserve your commission and begin work, with the balance due upon completion.</p>
     </div>
-    <div class="acquire-details">
+    <div class="acquire-details" id="acquire-details">
       Available for:<br>
       <span>Original paintings &amp; works on paper</span>
       <span>Gallery representation</span>
@@ -2690,6 +2726,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
     <div class="private-tabs">
       <button class="private-tab active" id="ptab-inventory" onclick="switchPrivateTab('inventory')">&#127912; Inventory</button>
       <button class="private-tab" id="ptab-finance" onclick="switchPrivateTab('finance')">&#128200; Finances</button>
+      <button class="private-tab" id="ptab-site" onclick="switchPrivateTab('site')">&#9881;&#65039; Site Manager</button>
     </div>
     <button class="private-close-btn" onclick="signOutStudio()" style="margin-right:8px;">Sign Out</button>
     <button class="private-close-btn" onclick="closePrivateArea()">&#10005; Close</button>
@@ -3667,6 +3704,68 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   Timeline assumes $708/mo debt allocation and no new credit card charges
 </footer>
 
+<!-- Site Manager Panel -->
+  <div class="private-panel" id="panel-site-manager">
+    <div class="sm-wrap">
+      <p class="sm-intro">Edit the public content of alinevillanueva.com. Changes save to your studio database and appear on the live site within seconds — no redeployment needed. Use the toggles to show or hide whole sections.</p>
+
+      <div class="sm-section">
+        <div class="sm-sec-head">
+          <span class="sm-sec-title">Hero — top of page</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-vis-hero" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <div class="sm-field"><label>Eyebrow line</label><input type="text" id="sm-hero-eyebrow" oninput="smDirty()"></div>
+        <div class="sm-field"><label>Name (one line per part — middle line is italic)</label><textarea id="sm-hero-name" style="min-height:70px;" oninput="smDirty()"></textarea></div>
+        <div class="sm-field"><label>Tagline</label><textarea id="sm-hero-bio" oninput="smDirty()"></textarea></div>
+      </div>
+
+      <div class="sm-section">
+        <div class="sm-sec-head">
+          <span class="sm-sec-title">Selected Works</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-vis-works" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <p class="sm-hint">Works themselves are managed in the Inventory tab — this toggle controls whether the section appears publicly.</p>
+      </div>
+
+      <div class="sm-section">
+        <div class="sm-sec-head">
+          <span class="sm-sec-title">Artist Statement</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-vis-statement" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <div class="sm-field"><label>Statement text (blank line between paragraphs; start a line with * for italic)</label><textarea id="sm-statement" style="min-height:220px;" oninput="smDirty()"></textarea></div>
+      </div>
+
+      <div class="sm-section">
+        <div class="sm-sec-head">
+          <span class="sm-sec-title">CV — Education</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-vis-cv" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <div class="sm-field"><label>Education entries (one per line: Year | Title | Venue)</label><textarea id="sm-education" style="min-height:130px;" oninput="smDirty()"></textarea></div>
+        <div class="sm-field"><label>Selected Exhibitions (one per line: Year | Title | Venue)</label><textarea id="sm-exhibitions" style="min-height:150px;" oninput="smDirty()"></textarea></div>
+        <div class="sm-sec-head" style="margin-top:18px;">
+          <span class="sm-sec-title" style="font-size:0.9rem;">"Download Full CV" button</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-cv-btn" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <label class="sm-file-label" for="sm-cv-file">&#8593; Upload a new CV (PDF, max 10 MB)<input type="file" class="sm-file" id="sm-cv-file" accept="application/pdf" onchange="smUploadCV(this)"></label>
+        <div class="sm-current" id="sm-cv-current"></div>
+      </div>
+
+      <div class="sm-section">
+        <div class="sm-sec-head">
+          <span class="sm-sec-title">Acquire &amp; Contact</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-vis-acquire" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <div class="sm-field"><label>Contact email (used for the public email link and all inquiry buttons)</label><input type="email" id="sm-email" oninput="smDirty()"></div>
+        <div class="sm-field"><label>"Available for" list (one per line)</label><textarea id="sm-acquire-details" style="min-height:130px;" oninput="smDirty()"></textarea></div>
+      </div>
+
+      <div class="sm-actions">
+        <button class="sm-btn" id="sm-save" onclick="smSave()">Save &amp; Publish</button>
+        <button class="sm-btn secondary" onclick="smLoad(true)">Discard changes</button>
+        <span class="sm-status" id="sm-status"></span>
+      </div>
+    </div>
+  </div>
 </div><!-- end private-area-inner -->
 </div><!-- end private-area -->
 
@@ -3771,6 +3870,13 @@ function switchPrivateTab(tab) {
   document.querySelectorAll('.private-tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.private-panel').forEach(p => p.classList.remove('active'));
   const ff = document.getElementById('finance-footer');
+  if (tab === 'site') {
+    document.getElementById('ptab-site').classList.add('active');
+    document.getElementById('panel-site-manager').classList.add('active');
+    if (ff) ff.style.display = 'none';
+    smLoad();
+    return;
+  }
   if (tab === 'inventory') {
     document.getElementById('ptab-inventory').classList.add('active');
     document.getElementById('panel-inventory-tool').classList.add('active');
@@ -6229,6 +6335,308 @@ document.addEventListener('DOMContentLoaded', function() {
   loadHeroFromFirestore();
   loadPublicPortfolio();
 });
+
+// ══════════════════════════════════════════════════════════════════════════
+// SITE MANAGER — edit public site content, stored in Firestore siteSettings/site
+// ══════════════════════════════════════════════════════════════════════════
+var smDefaults = null;
+var smLoadedOnce = false;
+
+function smEscape(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function smCaptureDefaults() {
+  if (smDefaults) return smDefaults;
+  var d = { visibility: {} };
+  var el;
+  el = document.getElementById('hero-eyebrow');    d.heroEyebrow = el ? el.textContent : '';
+  el = document.getElementById('hero-name');       d.heroNameHtml = el ? el.innerHTML : '';
+  el = document.getElementById('hero-bio');        d.heroBio = el ? el.textContent : '';
+  el = document.getElementById('statement-text');  d.statementHtml = el ? el.innerHTML : '';
+  el = document.getElementById('education-list');  d.educationHtml = el ? el.innerHTML : '';
+  el = document.getElementById('exhibitions-list');d.exhibitionsHtml = el ? el.innerHTML : '';
+  el = document.getElementById('acquire-details'); d.acquireHtml = el ? el.innerHTML : '';
+  d.contactEmail = 'alien_villa42@icloud.com';
+  d.cvButtonVisible = true;
+  d.cvUrl = 'Aline-Marbella-Villanueva-CV.pdf';
+  smDefaults = d;
+  return d;
+}
+
+// Convert the hard-coded statement HTML into the plain-text editing format
+function smStatementToText(html) {
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  var paras = [];
+  tmp.querySelectorAll('p').forEach(function(p) {
+    var t = p.textContent.trim();
+    if (p.querySelector('em')) t = '* ' + t;
+    paras.push(t);
+  });
+  return paras.join('\n\n');
+}
+
+function smTextToStatement(text) {
+  return text.split(/\n\s*\n/).map(function(p) { return p.trim(); }).filter(Boolean).map(function(p) {
+    if (p.charAt(0) === '*') return '<p><em>' + smEscape(p.replace(/^\*\s*/, '')) + '</em></p>';
+    return '<p>' + smEscape(p) + '</p>';
+  }).join('\n      ');
+}
+
+// List entries: "Year | Title | Venue" <-> exh-item HTML
+function smListToText(html) {
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  var rows = [];
+  tmp.querySelectorAll('.exh-item').forEach(function(li) {
+    var year  = (li.querySelector('.exh-year')  || {}).textContent || '';
+    var title = (li.querySelector('.exh-title') || {}).textContent || '';
+    var venue = (li.querySelector('.exh-venue') || {}).textContent || '';
+    rows.push([year.trim(), title.trim(), venue.trim()].join(' | '));
+  });
+  return rows.join('\n');
+}
+
+function smTextToList(text) {
+  return text.split('\n').map(function(l) { return l.trim(); }).filter(Boolean).map(function(l) {
+    var parts = l.split('|');
+    var year  = smEscape((parts[0] || '').trim());
+    var title = smEscape((parts[1] || '').trim());
+    var venue = smEscape((parts.slice(2).join('|') || '').trim());
+    return '<li class="exh-item">\n          <span class="exh-year">' + year + '</span>\n          <div><p class="exh-title">' + title + '</p><p class="exh-venue">' + venue + '</p></div>\n        </li>';
+  }).join('\n        ');
+}
+
+// Acquire details: "Line" / "*Line" (muted span) / "#Line" (location footer)
+function smAcquireToText(html) {
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  var rows = [];
+  tmp.childNodes.forEach(function(n) {
+    if (n.nodeType === 3) {
+      var t = n.textContent.trim();
+      if (t) rows.push(t);
+    } else if (n.nodeType === 1) {
+      if (n.tagName === 'SPAN') rows.push('* ' + n.textContent.trim());
+      // <br> separators are skipped
+    }
+  });
+  // The trailing plain line (e.g. "Mississippi, USA") is the location footer
+  if (rows.length && rows[rows.length - 1].charAt(0) !== '*') {
+    rows[rows.length - 1] = '# ' + rows[rows.length - 1];
+  }
+  return rows.join('\n');
+}
+
+function smTextToAcquire(text) {
+  var out = [];
+  text.split('\n').forEach(function(l) {
+    l = l.trim();
+    if (!l) return;
+    if (l.charAt(0) === '*') out.push('      <span>' + smEscape(l.replace(/^\*\s*/, '')) + '</span>');
+    else if (l.charAt(0) === '#') out.push('      ' + smEscape(l.replace(/^#\s*/, '')));
+    else out.push('      ' + smEscape(l) + '<br>');
+  });
+  return out.join('\n');
+}
+
+function smHeroNameToText(html) {
+  return html.split(/<br\s*\/?>/i).map(function(p) {
+    return p.replace(/<\/?em>/gi, '').replace(/<[^>]+>/g, '').trim();
+  }).filter(Boolean).join('\n');
+}
+
+function smTextToHeroName(text) {
+  var lines = text.split('\n').map(function(l) { return l.trim(); }).filter(Boolean);
+  return lines.map(function(l, i) {
+    return i === 1 ? '<em>' + smEscape(l) + '</em>' : smEscape(l);
+  }).join('<br>');
+}
+
+function smDirty() {
+  var s = document.getElementById('sm-status');
+  if (s) s.textContent = 'Unsaved changes';
+}
+
+function smFillForm(c) {
+  var d = smCaptureDefaults();
+  function val(id, v) { var el = document.getElementById(id); if (el) el.value = v; }
+  function chk(id, v) { var el = document.getElementById(id); if (el) el.checked = !!v; }
+  val('sm-hero-eyebrow', c.heroEyebrow != null ? c.heroEyebrow : d.heroEyebrow);
+  val('sm-hero-name',    c.heroNameText != null ? c.heroNameText : smHeroNameToText(d.heroNameHtml));
+  val('sm-hero-bio',     c.heroBio != null ? c.heroBio : d.heroBio);
+  val('sm-statement',    c.statementText != null ? c.statementText : smStatementToText(d.statementHtml));
+  val('sm-education',    c.educationText != null ? c.educationText : smListToText(d.educationHtml));
+  val('sm-exhibitions',  c.exhibitionsText != null ? c.exhibitionsText : smListToText(d.exhibitionsHtml));
+  val('sm-email',        c.contactEmail || d.contactEmail);
+  val('sm-acquire-details', c.acquireText != null ? c.acquireText : smAcquireToText(d.acquireHtml));
+  var vis = c.visibility || {};
+  chk('sm-vis-hero',      vis.hero !== false);
+  chk('sm-vis-works',     vis.works !== false);
+  chk('sm-vis-statement', vis.statement !== false);
+  chk('sm-vis-cv',        vis.cv !== false);
+  chk('sm-vis-acquire',   vis.acquire !== false);
+  chk('sm-cv-btn',        c.cvButtonVisible !== false);
+  var cur = document.getElementById('sm-cv-current');
+  if (cur) cur.textContent = c.cvUrl ? ('Current CV: ' + c.cvUrl) : '';
+}
+
+function smLoad(force) {
+  if (smLoadedOnce && !force) return;
+  smLoadedOnce = true;
+  smCaptureDefaults();
+  var s = document.getElementById('sm-status');
+  if (typeof firebase === 'undefined' || !firebase.firestore) { smFillForm({}); return; }
+  if (s) s.textContent = 'Loading…';
+  firebase.firestore().collection('siteSettings').doc('site').get()
+    .then(function(doc) {
+      smFillForm(doc.exists ? (doc.data() || {}) : {});
+      if (s) s.textContent = '';
+    })
+    .catch(function() { smFillForm({}); if (s) s.textContent = 'Could not load saved content — showing current site text.'; });
+}
+
+function smSave() {
+  var s = document.getElementById('sm-status');
+  var btn = document.getElementById('sm-save');
+  function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+  function chk(id) { var el = document.getElementById(id); return el ? !!el.checked : true; }
+  var content = {
+    heroEyebrow: val('sm-hero-eyebrow'),
+    heroNameText: val('sm-hero-name'),
+    heroBio: val('sm-hero-bio'),
+    statementText: val('sm-statement'),
+    educationText: val('sm-education'),
+    exhibitionsText: val('sm-exhibitions'),
+    contactEmail: val('sm-email').trim(),
+    acquireText: val('sm-acquire-details'),
+    cvButtonVisible: chk('sm-cv-btn'),
+    visibility: {
+      hero: chk('sm-vis-hero'),
+      works: chk('sm-vis-works'),
+      statement: chk('sm-vis-statement'),
+      cv: chk('sm-vis-cv'),
+      acquire: chk('sm-vis-acquire')
+    },
+    updatedAt: Date.now()
+  };
+  // Preserve the CV url already stored (upload sets it separately)
+  var finish = function(existingUrl) {
+    content.cvUrl = existingUrl || smDefaults.cvUrl;
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+      if (s) s.textContent = 'Database unavailable — cannot save.';
+      return;
+    }
+    if (btn) btn.disabled = true;
+    if (s) s.textContent = 'Saving…';
+    firebase.firestore().collection('siteSettings').doc('site').set(content, { merge: true })
+      .then(function() {
+        smApplyContent(content);
+        if (s) s.textContent = 'Published — live on the site now.';
+        if (btn) btn.disabled = false;
+      })
+      .catch(function(e) {
+        if (s) s.textContent = 'Save failed: ' + (e && e.message ? e.message : 'try again');
+        if (btn) btn.disabled = false;
+      });
+  };
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    firebase.firestore().collection('siteSettings').doc('site').get()
+      .then(function(doc) { finish(doc.exists ? doc.data().cvUrl : null); })
+      .catch(function() { finish(null); });
+  } else {
+    finish(null);
+  }
+}
+
+function smUploadCV(input) {
+  var file = input.files && input.files[0];
+  var cur = document.getElementById('sm-cv-current');
+  if (!file) return;
+  if (file.type !== 'application/pdf') { if (cur) cur.textContent = 'Please choose a PDF file.'; input.value = ''; return; }
+  if (file.size > 10 * 1024 * 1024) { if (cur) cur.textContent = 'PDF is larger than 10 MB.'; input.value = ''; return; }
+  if (cur) cur.textContent = 'Uploading ' + file.name + '…';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    fetch('/upload-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileData: e.target.result })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success || !data.url) throw new Error(data.error || 'upload failed');
+      var url = data.url;
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        return firebase.firestore().collection('siteSettings').doc('site').set({ cvUrl: url, updatedAt: Date.now() }, { merge: true })
+          .then(function() { return url; });
+      }
+      return url;
+    })
+    .then(function(url) {
+      if (cur) cur.textContent = 'Current CV: ' + url;
+      var btn = document.getElementById('cv-download-btn');
+      if (btn) btn.href = url;
+      smDirty();
+    })
+    .catch(function(err) {
+      if (cur) cur.textContent = 'Upload failed: ' + (err && err.message ? err.message : 'try again');
+    })
+    .finally(function() { input.value = ''; });
+  };
+  reader.readAsDataURL(file);
+}
+
+// Apply saved content to the public page (used on load and right after saving)
+function smApplyContent(c) {
+  if (!c) return;
+  var d = smDefaults || smCaptureDefaults();
+  var el;
+  el = document.getElementById('hero-eyebrow');
+  if (el && c.heroEyebrow != null) el.textContent = c.heroEyebrow;
+  el = document.getElementById('hero-name');
+  if (el && c.heroNameText != null) el.innerHTML = smTextToHeroName(c.heroNameText);
+  el = document.getElementById('hero-bio');
+  if (el && c.heroBio != null) el.textContent = c.heroBio;
+  el = document.getElementById('statement-text');
+  if (el && c.statementText != null) el.innerHTML = smTextToStatement(c.statementText);
+  el = document.getElementById('education-list');
+  if (el && c.educationText != null) el.innerHTML = smTextToList(c.educationText);
+  el = document.getElementById('exhibitions-list');
+  if (el && c.exhibitionsText != null) el.innerHTML = smTextToList(c.exhibitionsText);
+  el = document.getElementById('acquire-details');
+  if (el && c.acquireText != null) el.innerHTML = smTextToAcquire(c.acquireText);
+  el = document.getElementById('acquire-email');
+  if (el && c.contactEmail) {
+    el.textContent = c.contactEmail;
+    el.href = 'mailto:' + c.contactEmail;
+  }
+  el = document.getElementById('cv-download-btn');
+  if (el) {
+    if (c.cvUrl) el.href = c.cvUrl;
+    el.style.display = (c.cvButtonVisible === false) ? 'none' : '';
+  }
+  var vis = c.visibility || {};
+  [['hero', vis.hero], ['works', vis.works], ['statement', vis.statement], ['cv', vis.cv], ['acquire', vis.acquire]]
+    .forEach(function(pair) {
+      var sec = document.getElementById(pair[0]);
+      if (sec) sec.style.display = (pair[1] === false) ? 'none' : '';
+    });
+}
+
+function smLoadPublicContent() {
+  smCaptureDefaults();
+  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  try {
+    firebase.firestore().collection('siteSettings').doc('site').get()
+      .then(function(doc) { if (doc.exists) smApplyContent(doc.data() || {}); })
+      .catch(function() {});
+  } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', smLoadPublicContent);
+
 </script>
 
 </body>
