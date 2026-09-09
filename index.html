@@ -3728,6 +3728,12 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
           <label class="sm-toggle"><input type="checkbox" id="sm-vis-works" checked onchange="smDirty()"><span class="sm-track"></span></label>
         </div>
         <p class="sm-hint">Works themselves are managed in the Inventory tab — this toggle controls whether the section appears publicly.</p>
+        <div class="sm-sec-head" style="margin-top:18px;">
+          <span class="sm-sec-title" style="font-size:0.9rem;">Show prices publicly</span>
+          <label class="sm-toggle"><input type="checkbox" id="sm-prices-visible" checked onchange="smDirty()"><span class="sm-track"></span></label>
+        </div>
+        <div class="sm-field"><label>Text shown when prices are hidden</label><input type="text" id="sm-price-text" placeholder="Price upon request" oninput="smDirty()"></div>
+        <p class="sm-hint">Sold and Not-for-Sale labels always stay as they are.</p>
       </div>
 
       <div class="sm-section">
@@ -6194,6 +6200,7 @@ function loadPublicPortfolio() {
 }
 
 function renderWorks(works) {
+  window._lastPublicWorks = works;
   var grid = document.getElementById('works-grid');
   var count = document.getElementById('works-count');
   count.textContent = works.length + ' work' + (works.length !== 1 ? 's' : '');
@@ -6206,8 +6213,10 @@ function renderWorks(works) {
       priceHtml = '<p class="work-price sold"><span class="sold-badge">Sold</span></p>';
     } else if (isNFS) {
       priceHtml = '<p class="work-price" style="color:var(--slate);">Not for Sale</p>';
-    } else if (w.price) {
+    } else if (w.price && smPriceState.visible) {
       priceHtml = '<p class="work-price">$' + Number(w.price).toLocaleString() + '</p>';
+    } else if (w.price) {
+      priceHtml = '<p class="work-price" style="color:var(--slate);font-style:italic;">' + smPriceState.text + '</p>';
     } else {
       priceHtml = '<p class="work-price" style="color:var(--slate);font-style:italic;">Inquire for pricing</p>';
     }
@@ -6271,10 +6280,15 @@ function openLightbox(w) {
     priceEl.textContent = 'Not for Sale';
     priceEl.className = 'lb-price';
     priceEl.style.color = 'rgba(247,247,245,.5)';
-  } else if (w.price) {
+  } else if (w.price && smPriceState.visible) {
     priceEl.textContent = '$' + Number(w.price).toLocaleString();
     priceEl.className = 'lb-price';
     priceEl.style.color = 'var(--white)';
+  } else if (w.price) {
+    priceEl.textContent = smPriceState.text;
+    priceEl.className = 'lb-price';
+    priceEl.style.color = 'rgba(247,247,245,.6)';
+    priceEl.style.fontStyle = 'italic';
   } else {
     priceEl.textContent = 'Inquire for pricing';
     priceEl.className = 'lb-price';
@@ -6339,6 +6353,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ══════════════════════════════════════════════════════════════════════════
+// Public price visibility (controlled from Site Manager)
+var smPriceState = { visible: true, text: 'Price upon request' };
 // SITE MANAGER — edit public site content, stored in Firestore siteSettings/site
 // ══════════════════════════════════════════════════════════════════════════
 var smDefaults = null;
@@ -6480,6 +6496,8 @@ function smFillForm(c) {
   chk('sm-vis-cv',        vis.cv !== false);
   chk('sm-vis-acquire',   vis.acquire !== false);
   chk('sm-cv-btn',        c.cvButtonVisible !== false);
+  chk('sm-prices-visible', c.pricesVisible !== false);
+  val('sm-price-text',    c.priceText || '');
   var cur = document.getElementById('sm-cv-current');
   if (cur) cur.textContent = c.cvUrl ? ('Current CV: ' + c.cvUrl) : '';
 }
@@ -6514,6 +6532,8 @@ function smSave() {
     contactEmail: val('sm-email').trim(),
     acquireText: val('sm-acquire-details'),
     cvButtonVisible: chk('sm-cv-btn'),
+    pricesVisible: chk('sm-prices-visible'),
+    priceText: val('sm-price-text').trim() || 'Price upon request',
     visibility: {
       hero: chk('sm-vis-hero'),
       works: chk('sm-vis-works'),
@@ -6618,6 +6638,13 @@ function smApplyContent(c) {
   if (el) {
     if (c.cvUrl) el.href = c.cvUrl;
     el.style.display = (c.cvButtonVisible === false) ? 'none' : '';
+  }
+  if (c.pricesVisible !== undefined || c.priceText !== undefined) {
+    smPriceState.visible = (c.pricesVisible !== false);
+    smPriceState.text = (c.priceText && String(c.priceText).trim()) || 'Price upon request';
+    if (window._lastPublicWorks && typeof renderWorks === 'function') {
+      renderWorks(window._lastPublicWorks);
+    }
   }
   var vis = c.visibility || {};
   [['hero', vis.hero], ['works', vis.works], ['statement', vis.statement], ['cv', vis.cv], ['acquire', vis.acquire]]
