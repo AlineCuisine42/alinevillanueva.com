@@ -1396,22 +1396,6 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   .section-label{margin-bottom:40px;}
 }
 
-/* SHIPPING ESTIMATOR (public) */
-.ship-est{margin-top:32px;padding-top:28px;border-top:1px solid rgba(247,247,245,.15);}
-.ship-est-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,247,245,.45);margin-bottom:14px;}
-.ship-est-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.ship-est-row select{flex:1;min-width:140px;background:rgba(247,247,245,.07);border:1px solid rgba(247,247,245,.15);color:rgba(247,247,245,.85);font-family:var(--sans);font-size:12px;padding:8px 10px;border-radius:3px;cursor:pointer;}
-.ship-est-row select:focus{outline:none;border-color:var(--sage);}
-.ship-est-row select option{background:#1a1a18;color:#f7f7f5;}
-.ship-rate-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;margin-bottom:6px;border:1px solid rgba(247,247,245,.1);border-radius:3px;}
-.ship-rate-row.best{border-color:var(--sage);background:rgba(160,180,140,.08);}
-.ship-rate-name{font-size:12px;color:rgba(247,247,245,.7);}
-.ship-rate-row.best .ship-rate-name{color:var(--sage);font-weight:500;}
-.ship-rate-amt{font-family:var(--mono,monospace);font-size:14px;font-weight:600;color:rgba(247,247,245,.9);}
-.ship-rate-note{font-size:10px;color:rgba(247,247,245,.35);margin-top:2px;}
-.ship-disclaimer{font-size:10px;color:rgba(247,247,245,.3);line-height:1.6;margin-top:8px;}
-@media(max-width:768px){.ship-est-row{flex-direction:column;} .ship-est-row select{min-width:100%;} .ship-rate-row{flex-wrap:wrap;gap:4px;}}
-
 /* ═══════════════════════════════════════════
    BACKEND CSS (passcode, private area, inventory)
    ═══════════════════════════════════════════ */
@@ -2656,28 +2640,6 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
         </div>
       </div>
       <p style="font-size:11px;letter-spacing:.06em;color:rgba(247,247,245,.4);font-style:italic;margin:6px 0 20px;">Shipping &amp; handling not included in listed prices.</p>
-      <!-- SHIPPING ESTIMATOR -->
-      <div class="ship-est" id="ship-est">
-        <p class="ship-est-label">Estimate shipping cost</p>
-        <div class="ship-est-row">
-          <select id="pub-ship-type" onchange="pubCalcShipping()">
-            <option value="unframed-print">Unframed print (tube)</option>
-            <option value="small-canvas">Canvas — Small (≤16×20")</option>
-            <option value="medium-canvas" selected>Canvas — Medium (≤24×30")</option>
-            <option value="large-canvas">Canvas — Large (≤36×48")</option>
-            <option value="xlarge-canvas">Canvas — XL (36×48"+)</option>
-            <option value="small-framed">Framed — Small (≤18")</option>
-            <option value="medium-framed">Framed — Medium (18–30")</option>
-            <option value="large-framed">Framed — Large (30"+)</option>
-          </select>
-          <select id="pub-ship-dest" onchange="pubCalcShipping()">
-            <option value="local">Local / Same State</option>
-            <option value="domestic" selected>Domestic (US)</option>
-            <option value="intl">International</option>
-          </select>
-        </div>
-        <div id="pub-ship-result"></div>
-      </div>
       <p style="font-size:11px;letter-spacing:.06em;color:rgba(247,247,245,.4);font-style:italic;margin:20px 0 0;line-height:1.8;">Commissions are welcomed. A 20% deposit is required to reserve your commission and begin work, with the balance due upon completion.</p>
     </div>
     <div class="acquire-details">
@@ -2764,6 +2726,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
   <button class="tab-btn active" onclick="showTab('inventory', this)">Inventory</button>
   <button class="tab-btn" onclick="showTab('add', this)">Add Work</button>
   <button class="tab-btn" onclick="showTab('pricing', this)">Pricing Calculator</button>
+  <button class="tab-btn" onclick="showTab('shipping', this)">Shipping Calculator</button>
   <button class="tab-btn" onclick="showTab('quote', this)">Quote Builder</button>
   <button class="tab-btn" onclick="showTab('analytics', this)">Analytics</button>
   <button class="tab-btn" onclick="showTab('coa', this)">Certificate</button>
@@ -2986,6 +2949,51 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
           <h3 style="font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;margin-bottom:12px;">Pricing Methods Compared</h3>
           <div id="price-methods" style="font-size:0.82rem;line-height:1.8;color:var(--muted);"></div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SHIPPING CALCULATOR ══════════════ -->
+<div class="panel" id="panel-shipping">
+  <div class="section-title">Shipping Calculator</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;" id="shipping-layout">
+    <div class="card">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;margin-bottom:16px;">Shipment Details</h3>
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Art Type</label>
+          <select id="ship-type" onchange="calcShipping()" style="width:100%;">
+            <option value="unframed-print">Unframed Print (tube)</option>
+            <option value="small-canvas">Canvas — Small (≤16×20")</option>
+            <option value="medium-canvas">Canvas — Medium (≤24×30")</option>
+            <option value="large-canvas">Canvas — Large (≤36×48")</option>
+            <option value="xlarge-canvas">Canvas — XL (36×48"+)</option>
+            <option value="small-framed">Framed — Small (≤18")</option>
+            <option value="medium-framed">Framed — Medium (18–30")</option>
+            <option value="large-framed">Framed — Large (30"+)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Destination</label>
+          <select id="ship-dest" onchange="calcShipping()" style="width:100%;">
+            <option value="local">Local / Same State</option>
+            <option value="domestic">Domestic (US)</option>
+            <option value="intl">International</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-size:0.75rem;color:var(--muted);">Tap any rate below to copy it to your Quote Builder</label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pricing-result" id="ship-result-panel" style="padding:0;background:transparent;border:none;">
+        <div id="ship-results" style="font-size:0.85rem;"></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3 style="font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;margin-bottom:10px;">Packaging Tips</h3>
+        <div id="ship-tips" style="font-size:0.82rem;line-height:1.8;color:var(--muted);"></div>
       </div>
     </div>
   </div>
@@ -3667,7 +3675,7 @@ footer span{font-size:11px;color:rgba(247,247,245,.25);letter-spacing:.06em;}
 ════════════════════════════════════════════════════════════════ -->
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── Portfolio nav scroll ──────────────────────────────────────────
-const nav = document.getElementById('nav');
+const nav = document.getElementById('main-nav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
 
 // ── Secure studio gateway (Firebase Authentication) ─────────────
@@ -3787,41 +3795,6 @@ document.addEventListener('keydown', e => {
     else if (document.getElementById('private-area').style.display === 'block') closePrivateArea();
   }
 });
-
-// ── PUBLIC SHIPPING ESTIMATOR ────────────────────────────────────
-const PUB_SHIP_RATES = {
-  'unframed-print': { local:[9,7,11,10],    domestic:[14,10,16,15],   intl:[38,32,55,50] },
-  'small-canvas':   { local:[18,14,20,19],  domestic:[28,20,32,30],   intl:[75,62,95,88] },
-  'medium-canvas':  { local:[28,22,32,30],  domestic:[45,34,52,48],   intl:[110,90,140,128] },
-  'large-canvas':   { local:[45,36,55,50],  domestic:[75,58,90,82],   intl:[175,145,220,200] },
-  'xlarge-canvas':  { local:[80,65,100,92], domestic:[130,105,160,148],intl:[280,240,360,330] },
-  'small-framed':   { local:[22,17,26,24],  domestic:[35,26,42,38],   intl:[90,74,115,105] },
-  'medium-framed':  { local:[38,30,46,42],  domestic:[62,48,75,68],   intl:[148,122,185,170] },
-  'large-framed':   { local:[68,55,82,76],  domestic:[110,88,135,124],intl:[260,215,330,300] }
-};
-function pubCalcShipping() {
-  const type = document.getElementById('pub-ship-type').value;
-  const dest = document.getElementById('pub-ship-dest').value;
-  const rates = PUB_SHIP_RATES[type]?.[dest];
-  const out = document.getElementById('pub-ship-result');
-  if (!rates || !out) return;
-  const [usps, pirate, ups, fedex] = rates;
-  const carriers = [
-    { name: 'Pirate Ship (USPS)', rate: pirate, note: 'Best value — discounted USPS rates', best: true },
-    { name: 'USPS Retail',        rate: usps,   note: 'Priority Mail estimate' },
-    { name: 'UPS Ground',         rate: ups,    note: '3–5 business days' },
-    { name: 'FedEx Ground',       rate: fedex,  note: '3–5 business days' },
-  ];
-  out.innerHTML = carriers.map(c =>
-    `<div class="ship-rate-row${c.best ? ' best' : ''}">`+
-      `<div><div class="ship-rate-name">${c.name}</div><div class="ship-rate-note">${c.note}</div></div>`+
-      `<div class="ship-rate-amt">~$${c.rate}</div>`+
-    `</div>`
-  ).join('') +
-  `<p class="ship-disclaimer">Estimates based on 2025–2026 carrier rates. Actual cost varies by exact weight, dimensions, and destination zone.</p>`;
-}
-// Run on load
-document.addEventListener('DOMContentLoaded', pubCalcShipping);
 </script>
 
 <!-- Firebase SDK -->
@@ -3847,6 +3820,7 @@ function showTab(id, btn) {
   document.getElementById('panel-' + id).classList.add('active');
   if (id === 'inventory') renderInventory();
   if (id === 'pricing') calcPrice();
+  if (id === 'shipping') calcShipping();
   if (id === 'quote') { populateQuoteSelect(); buildQuote(); }
   if (id === 'analytics') renderAnalytics();
   if (id === 'coa') coaPopulateSelect();
@@ -4402,6 +4376,75 @@ function calcPrice() {
 }
 calcPrice();
 
+// ── SHIPPING CALCULATOR ──────────────────────────────────────────
+const SHIP_RATES = {
+  'unframed-print': { local:[9,7,11,10], domestic:[14,10,16,15], intl:[38,32,55,50] },
+  'small-canvas': { local:[18,14,20,19], domestic:[28,20,32,30], intl:[75,62,95,88] },
+  'medium-canvas': { local:[28,22,32,30], domestic:[45,34,52,48], intl:[110,90,140,128] },
+  'large-canvas': { local:[45,36,55,50], domestic:[75,58,90,82], intl:[175,145,220,200] },
+  'xlarge-canvas': { local:[80,65,100,92], domestic:[130,105,160,148], intl:[280,240,360,330] },
+  'small-framed': { local:[22,17,26,24], domestic:[35,26,42,38], intl:[90,74,115,105] },
+  'medium-framed': { local:[38,30,46,42], domestic:[62,48,75,68], intl:[148,122,185,170] },
+  'large-framed': { local:[68,55,82,76], domestic:[110,88,135,124], intl:[260,215,330,300] }
+};
+
+const SHIP_TIPS = {
+  'unframed-print': 'Roll print in acid-free tissue, insert into a rigid mailing tube. Seal both ends with plastic end caps. Mark “Do Not Bend”. For international, declare as “Artwork — No Commercial Value”.',
+  'small-canvas': 'Wrap in glassine paper, then bubble wrap. Use a flat box with foam corners. For stretched canvas, protect with cardboard corner guards. 2” of padding on all sides.',
+  'medium-canvas': 'Double-box recommended: inner box snug around canvas, outer box with 2” foam/bubble wrap all sides. Use “Fragile” and “This Side Up” labels.',
+  'large-canvas': 'Consider a custom crate for works over 30”. Use a foam-lined wooden crate or professional art shipping box. Pirate Ship or UPS are best for oversized work; USPS has size limits.',
+  'xlarge-canvas': 'A wooden crate is strongly recommended. Contact a local art shipper or freight service for works over 48”. Pirate Ship plus UPS Freight is cost-effective for domestic shipments.',
+  'small-framed': 'Wrap glass or acrylic with painter’s tape in an X pattern before wrapping. Use foam corner protectors. Double-box with 2” padding. Mark “Fragile — Glass”.',
+  'medium-framed': 'Tape glass in an X, wrap in glassine and then bubble wrap. Use a mirror or picture box. Double-box anything over 20”. FedEx and UPS handle framed work well.',
+  'large-framed': 'Use a wooden crate or professional art-crating service. Remove glass if possible and ship it separately. Pirate Ship plus UPS Ground is most cost-effective domestically.'
+};
+
+function calcShipping() {
+  const typeEl = document.getElementById('ship-type');
+  const destEl = document.getElementById('ship-dest');
+  if (!typeEl || !destEl) return;
+  const type = typeEl.value;
+  const rates = SHIP_RATES[type]?.[destEl.value];
+  if (!rates) return;
+  const [usps, pirate, ups, fedex] = rates;
+  const carriers = [
+    { name: 'Pirate Ship (USPS) ★', rate: pirate, note: 'Best value — discounted USPS rates', best: true },
+    { name: 'USPS Retail', rate: usps, note: 'Priority Mail estimate' },
+    { name: 'UPS Ground', rate: ups, note: '3–5 business days' },
+    { name: 'FedEx Ground', rate: fedex, note: '3–5 business days' }
+  ];
+  const resultsEl = document.getElementById('ship-results');
+  if (resultsEl) {
+    resultsEl.innerHTML = carriers.map(c => `
+      <button type="button" onclick="useShippingRate(${c.rate})" style="
+        width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;
+        padding:12px 14px;margin-bottom:8px;background:${c.best ? 'rgba(192,92,42,0.07)' : 'white'};
+        border:1.5px solid ${c.best ? 'var(--accent)' : 'var(--warm-mid)'};
+        border-radius:var(--radius);cursor:pointer;color:var(--ink);font-family:var(--sans);">
+        <span><span style="display:block;font-weight:${c.best ? '600' : '400'};color:${c.best ? 'var(--accent)' : 'var(--ink)'}">${c.name}</span>
+        <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:2px;">${c.note}</span></span>
+        <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;">~$${c.rate}</span>
+      </button>
+    `).join('') + `<div style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.6;">Estimates based on 2025–2026 carrier rates. Actual cost varies by exact weight, dimensions, and destination zone. Tap a row to copy the amount to your Quote Builder.</div>`;
+  }
+  const tipsEl = document.getElementById('ship-tips');
+  if (tipsEl) tipsEl.textContent = SHIP_TIPS[type] || '';
+}
+
+function useShippingRate(amount) {
+  const quoteBtn = document.querySelector('.tab-btn[onclick*="quote"]');
+  showTab('quote', quoteBtn);
+  setTimeout(() => {
+    const el = document.getElementById('q-shipping');
+    if (!el) return;
+    el.value = amount;
+    buildQuote();
+    el.style.background = '#d4edda';
+    setTimeout(() => el.style.background = '', 900);
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
 // ── QUOTE BUILDER ────────────────────────────────────────────
 function populateQuoteSelect() {
   const sel = document.getElementById('q-work-select');
@@ -4762,7 +4805,7 @@ function uploadImageToStorage(file, workId, fallbackDataUrl) {
 // ── RESPONSIVE PRICING LAYOUT ────────────────────────────────
 function checkLayout() {
   const narrow = window.innerWidth < 700;
-  ['pricing-layout','quote-layout'].forEach(id => {
+  ['pricing-layout','shipping-layout','quote-layout'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.gridTemplateColumns = narrow ? '1fr' : '1fr 1fr';
   });
