@@ -113,6 +113,34 @@ async function uploadCv(request, env) {
   return json({ success: true, url: `${PUBLIC_R2_BASE}/${key}` }, 200, { 'cache-control': 'no-store' });
 }
 
+async function proxyImage(request) {
+  if (!requireAccess(request)) return json({ success: false, error: 'Access authentication required' }, 403);
+  const requested = new URL(request.url).searchParams.get('url') || '';
+  let target;
+  try {
+    target = new URL(requested);
+  } catch {
+    return json({ success: false, error: 'Invalid image URL' }, 400);
+  }
+  const allowedHost = 'pub-4836c3859b604ddf81b2d5d30b12c835.r2.dev';
+  if (target.protocol !== 'https:' || target.hostname !== allowedHost || !target.pathname.startsWith('/paintings/')) {
+    return json({ success: false, error: 'Image URL is not allowed' }, 403);
+  }
+  const upstream = await fetch(target.toString(), { cf: { cacheTtl: 86400, cacheEverything: true } });
+  if (!upstream.ok) return json({ success: false, error: 'Image could not be loaded' }, upstream.status);
+  const contentType = upstream.headers.get('content-type') || '';
+  if (!contentType.startsWith('image/')) return json({ success: false, error: 'Upstream content is not an image' }, 415);
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      'content-type': contentType,
+      'cache-control': 'private, max-age=300',
+      'access-control-allow-origin': new URL(request.url).origin,
+      'x-content-type-options': 'nosniff',
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -120,6 +148,7 @@ export default {
       if (request.method === 'POST' && url.pathname === '/api/publish') return await publish(request, env);
       if (request.method === 'POST' && url.pathname === '/upload-image') return await uploadImage(request, env);
       if (request.method === 'POST' && url.pathname === '/upload-cv') return await uploadCv(request, env);
+      if (request.method === 'GET' && url.pathname === '/proxy-image') return await proxyImage(request);
       return env.ASSETS.fetch(request);
     } catch (error) {
       return json({ success: false, error: error?.message || 'Request failed' }, 400, { 'cache-control': 'no-store' });
