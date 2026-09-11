@@ -31,29 +31,36 @@ function cleanWork(work) {
 }
 
 function cleanSettings(settings) {
-  const visibility = settings?.visibility || {};
-  return {
-    heroEyebrow: cleanText(settings?.heroEyebrow, 240),
-    heroNameText: cleanText(settings?.heroNameText, 500),
-    heroBio: cleanText(settings?.heroBio, 1000),
-    statementText: cleanText(settings?.statementText, 12000),
-    educationText: cleanText(settings?.educationText, 12000),
-    exhibitionsText: cleanText(settings?.exhibitionsText, 12000),
-    contactEmail: cleanText(settings?.contactEmail, 320),
-    acquireText: cleanText(settings?.acquireText, 4000),
-    cvButtonVisible: settings?.cvButtonVisible !== false,
-    cvUrl: cleanText(settings?.cvUrl, 2000),
-    pricesVisible: settings?.pricesVisible !== false,
-    priceText: cleanText(settings?.priceText || 'Price upon request', 240),
-    visibility: {
-      hero: visibility.hero !== false,
-      works: visibility.works !== false,
-      statement: visibility.statement !== false,
-      cv: visibility.cv !== false,
-      acquire: visibility.acquire !== false,
-    },
-    updatedAt: Number(settings?.updatedAt) || Date.now(),
+  const clean = {};
+  const owns = key => Object.prototype.hasOwnProperty.call(settings || {}, key);
+  const textFields = {
+    heroEyebrow: 240,
+    heroNameText: 500,
+    heroBio: 1000,
+    statementText: 12000,
+    educationText: 12000,
+    exhibitionsText: 12000,
+    contactEmail: 320,
+    acquireText: 4000,
+    cvUrl: 2000,
+    priceText: 240,
+    heroImageUrl: 2000,
+    heroWorkTitle: 240,
   };
+  for (const [key, max] of Object.entries(textFields)) {
+    if (owns(key)) clean[key] = cleanText(settings[key], max);
+  }
+  if (owns('heroWorkId')) clean.heroWorkId = Number(settings.heroWorkId) || null;
+  if (owns('cvButtonVisible')) clean.cvButtonVisible = settings.cvButtonVisible !== false;
+  if (owns('pricesVisible')) clean.pricesVisible = settings.pricesVisible !== false;
+  if (settings?.visibility && typeof settings.visibility === 'object') {
+    clean.visibility = {};
+    for (const key of ['hero', 'works', 'statement', 'cv', 'acquire']) {
+      if (Object.prototype.hasOwnProperty.call(settings.visibility, key)) clean.visibility[key] = settings.visibility[key] !== false;
+    }
+  }
+  clean.updatedAt = Number(settings?.updatedAt) || Date.now();
+  return clean;
 }
 
 function parseDataUrl(dataUrl, allowedTypes, maxBytes) {
@@ -73,7 +80,8 @@ async function readJson(request) {
 async function publish(request, env) {
   if (!requireAccess(request)) return json({ success: false, error: 'Access authentication required' }, 403);
   const incoming = await readJson(request);
-  const current = JSON.parse((await env.PUBLIC_CONTENT.get('site')) || '{}');
+  let current = (await env.PUBLIC_CONTENT.get('site')) || '{}';
+  while (typeof current === 'string') current = JSON.parse(current);
   if (Array.isArray(incoming.works)) {
     current.works = incoming.works.slice(0, 500).map(cleanWork).filter(work => work.id && work.title);
   }

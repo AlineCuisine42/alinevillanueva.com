@@ -71,6 +71,8 @@ const CLIENT_SYNC = String.raw`<script>
     var el = document.getElementById('acquire-details');
     var items = lines(value);
     if (!el || !items.length) return;
+    if (/^available for:?$/i.test(items[0])) items.shift();
+    items = items.map(function (item) { return item.replace(/^[*#]\s*/, ''); }).filter(Boolean);
     el.replaceChildren(document.createTextNode('Available for:'), document.createElement('br'));
     items.forEach(function (item) {
       var span = document.createElement('span');
@@ -85,6 +87,13 @@ const CLIENT_SYNC = String.raw`<script>
   function applySettings(settings) {
     if (!settings) return;
     var hero = document.getElementById('hero');
+    var heroImage = document.getElementById('hero-img');
+    if (heroImage && settings.heroImageUrl) {
+      heroImage.onload = function () { heroImage.style.opacity = '1'; };
+      heroImage.onerror = function () { heroImage.style.opacity = '1'; };
+      heroImage.src = settings.heroImageUrl;
+      if (heroImage.complete) heroImage.style.opacity = '1';
+    }
     if (hero && settings.heroEyebrow) {
       var eyebrow = document.getElementById('hero-eyebrow');
       if (!eyebrow) {
@@ -146,7 +155,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/api/public') {
-      const content = JSON.parse((await env.PUBLIC_CONTENT.get('site')) || '{}');
+      let content = (await env.PUBLIC_CONTENT.get('site')) || '{}';
+      while (typeof content === 'string') content = JSON.parse(content);
       return json(content, 200, { 'cache-control': PUBLIC_CACHE, 'access-control-allow-origin': 'https://www.alinevillanueva.com' });
     }
     const asset = await env.ASSETS.fetch(request);
