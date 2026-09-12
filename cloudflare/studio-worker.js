@@ -149,7 +149,13 @@ export default {
       if (request.method === 'POST' && url.pathname === '/upload-image') return await uploadImage(request, env);
       if (request.method === 'POST' && url.pathname === '/upload-cv') return await uploadCv(request, env);
       if (request.method === 'GET' && url.pathname === '/proxy-image') return await proxyImage(request);
-      return env.ASSETS.fetch(request);
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {
+        const headers = new Headers(assetResponse.headers);
+        headers.set('cache-control', 'private, no-store, max-age=0');
+        return new Response(assetResponse.body, { status: assetResponse.status, headers });
+      }
+      return assetResponse;
     } catch (error) {
       return json({ success: false, error: error?.message || 'Request failed' }, 400, { 'cache-control': 'no-store' });
     }
